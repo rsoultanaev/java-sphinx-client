@@ -1,4 +1,5 @@
 import org.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.math.ec.custom.sec.SecP224R1Point;
 import org.bouncycastle.util.encoders.Hex;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,6 +43,16 @@ public class Group_ECC_Test {
         byte[] output = group_ecc.multiexpon(base, exponents).getEncoded(true);
 
         assertArrayEquals(expectedOutput, output);
+    }
+
+    @Test
+    public void makeexp() throws Exception {
+        byte[] data = Hex.decode("03085f86c52bbb391e7fba0dd1e39541fe89ac5b6afd576c338948abe0");
+
+        BigInteger expectedOutput = new BigInteger("881795633944098057513291471553876590759951853908507227127236799785");
+        BigInteger output = group_ecc.makeexp(data);
+
+        assertEquals(expectedOutput, output);
     }
 
 }
