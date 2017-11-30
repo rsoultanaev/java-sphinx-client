@@ -34,4 +34,13 @@ public class Group_ECC {
 
         return base.multiply(finalExponent);
     }
+
+    public BigInteger makeexp(byte[] data) {
+        return null;
+    }
+
+    public byte[] printable(ECPoint alpha) {
+        return null;
+    }
+
 }
