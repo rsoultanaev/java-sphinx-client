@@ -15,9 +15,9 @@ public class SphinxParams_Test {
     @Test
     public void aesCtr() throws Exception {
         String plaintext = "265f3338efbf92c9feacf25fb10778b6d96996e72b41c4e4f55f373d182ba4e1acd5b972e95a917da9f6946924aab6e0b926b94996c25bea7e00422d1f11468578b60f460cb5ce2eafa72fef8cb1a2de";
-        String iv = "000000000000000000000000000000";
-        String key = "5F060D3716B345C253F6749ABAC10917";
-        String expectedOutput = "0e000098e34558b1c728b1580787f881012f2a1eaf3ac383fd596b13d87a95cce1376225b739b15e630f89fe64dbc54752a22ed567f1b368cae6aa1c374fdb008602fbbe5b1cfe3c7c256669e080903d";
+        String iv = "18e3e4c93f5bdd1fb4961630309206e6";
+        String key = "5f060d3716b345c253f6749abac10917";
+        String expectedOutput = "fbf3df496e16a07c149c197a1772e9901a7fbac16a9424c6282ed06624e4fdec5b2c1c50a347fb782647c8bce5b9a04b32a3eaa1c2d2aae082aad017103aa212e32569a45f0436ff4a5ea95c52522c92";
         String output = params.aesCtr(plaintext, iv, key);
         assertEquals(expectedOutput, output);
     }
