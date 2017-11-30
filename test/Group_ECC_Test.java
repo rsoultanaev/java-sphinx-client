@@ -24,10 +24,10 @@ public class Group_ECC_Test {
 
         ECPoint base = group_ecc.getGenerator();
 
-        String expectedOutput = "02a66335a59f1277c193315eb2db69808e6eaf15c944286765c0adcae2";
-        String output = Hex.toHexString(group_ecc.expon(base, secret).getEncoded(true));
+        byte[] expectedOutput = Hex.decode("02a66335a59f1277c193315eb2db69808e6eaf15c944286765c0adcae2");
+        byte[] output = group_ecc.expon(base, secret).getEncoded(true);
 
-        assertEquals(expectedOutput, output);
+        assertArrayEquals(expectedOutput, output);
     }
 
     @Test
@@ -38,10 +38,10 @@ public class Group_ECC_Test {
         ECPoint base = group_ecc.getGenerator();
         List<BigInteger> exponents = Arrays.asList(secret1, secret2);
 
-        String expectedOutput = "03085f86c52bbb391e7fba0dd1e39541fe89ac5b6afd576c338948abe0";
-        String output = Hex.toHexString(group_ecc.multiexpon(base, exponents).getEncoded(true));
+        byte[] expectedOutput = Hex.decode("03085f86c52bbb391e7fba0dd1e39541fe89ac5b6afd576c338948abe0");
+        byte[] output = group_ecc.multiexpon(base, exponents).getEncoded(true);
 
-        assertEquals(expectedOutput, output);
+        assertArrayEquals(expectedOutput, output);
     }
 
 }
