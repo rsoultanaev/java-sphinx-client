@@ -55,4 +55,8 @@ public class Group_ECC_Test {
         assertEquals(expectedOutput, output);
     }
 
+    @Test
+    public void printable() throws Exception {
+        assertTrue(false);
+    }
 }
