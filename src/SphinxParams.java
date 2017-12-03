@@ -1,6 +1,8 @@
 import org.bouncycastle.crypto.CipherParameters;
+import org.bouncycastle.crypto.Mac;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.engines.AESEngine;
+import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.crypto.modes.SICBlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
@@ -8,6 +10,7 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.spec.ECPoint;
+import java.util.Arrays;
 
 public class SphinxParams {
 
@@ -56,7 +59,15 @@ public class SphinxParams {
     }
 
     public byte[] mu(byte[] key, byte[] data) {
-        return null;
+        Mac mac = new HMac(new SHA256Digest());
+        CipherParameters cipherParameters = new KeyParameter(key);
+        mac.init(cipherParameters);
+        byte[] output = new byte[mac.getMacSize()];
+
+        mac.update(data, 0, data.length);
+        mac.doFinal(output, 0);
+
+        return Arrays.copyOf(output, keyLength);
     }
 
     public byte[] pi(byte[] key, byte[] data) {
