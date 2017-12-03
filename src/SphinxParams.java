@@ -1,8 +1,22 @@
+import org.bouncycastle.crypto.CipherParameters;
+import org.bouncycastle.crypto.engines.AESEngine;
+import org.bouncycastle.crypto.modes.SICBlockCipher;
+import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.crypto.params.ParametersWithIV;
 
 public class SphinxParams {
 
     public byte[] aesCtr(byte[] key, byte[] message, byte[] iv) {
-        return null;
+        CipherParameters params = new ParametersWithIV(new KeyParameter(key), iv);
+        SICBlockCipher engine = new SICBlockCipher(new AESEngine());
+
+        engine.init(true, params);
+
+        byte[] ciphertext = new byte[message.length];
+
+        engine.processBytes(message, 0, message.length, ciphertext, 0);
+
+        return ciphertext;
     }
 
     public byte[] lionessEnc(byte[] key, byte[] message) {
