@@ -31,6 +31,14 @@ public class SphinxParams_Test {
     }
 
     @Test
+    public void aesCtrEncryptNoIV() throws Exception {
+        byte[] expectedOutput = Hex.decode("0e000098e34558b1c728b1580787f881012f2a1eaf3ac383fd596b13d87a95cce1376225b739b15e630f89fe64dbc54752a22ed567f1b368cae6aa1c374fdb008602fbbe5b1cfe3c7c256669e080903d");
+        byte[] output = params.aesCtr(key, plaintext);
+
+        assertArrayEquals(expectedOutput, output);
+    }
+
+    @Test
     public void aesCtrEncryptThenDecrypt() throws Exception {
         byte[] iv = Hex.decode("18e3e4c93f5bdd1fb4961630309206e6");
 

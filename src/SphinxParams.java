@@ -32,6 +32,11 @@ public class SphinxParams {
         return ciphertext;
     }
 
+    public byte[] aesCtr(byte[] key, byte[] message) {
+        byte[] iv = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+        return aesCtr(key, message, iv);
+    }
+
     public byte[] lionessEnc(byte[] key, byte[] message) {
         return null;
     }
