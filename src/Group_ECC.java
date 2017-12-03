@@ -5,8 +5,8 @@ import java.math.BigInteger;
 import java.util.List;
 
 public class Group_ECC {
-    private ECPoint generator;
-    private BigInteger order;
+    private final ECPoint generator;
+    private final BigInteger order;
 
     public Group_ECC() {
         ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec("secp224r1");
