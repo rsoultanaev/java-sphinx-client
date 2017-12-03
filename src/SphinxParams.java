@@ -46,7 +46,9 @@ public class SphinxParams {
     }
 
     public byte[] xorRho(byte[] key, byte[] plain) {
-        return null;
+        assert (key.length == keyLength);
+
+        return aesCtr(key, plain);
     }
 
     public byte[] mu(byte[] key, byte[] data) {
