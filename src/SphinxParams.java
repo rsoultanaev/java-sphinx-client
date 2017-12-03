@@ -7,6 +7,7 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.security.spec.ECPoint;
 
 public class SphinxParams {
 
@@ -86,7 +87,7 @@ public class SphinxParams {
         return aesCtr(k, m, flavor);
     }
 
-    public byte[] hb(byte[] alpha, byte[] k) {
+    public BigInteger hb(ECPoint alpha, byte[] k) {
         return null;
     }
 
