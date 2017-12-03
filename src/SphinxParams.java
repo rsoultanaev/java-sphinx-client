@@ -1,4 +1,5 @@
 import org.bouncycastle.crypto.CipherParameters;
+import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.engines.AESEngine;
 import org.bouncycastle.crypto.modes.SICBlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
@@ -44,7 +45,13 @@ public class SphinxParams {
     }
 
     public byte[] hash(byte[] data) {
-        return null;
+        SHA256Digest digest = new SHA256Digest();
+        byte[] output = new byte[digest.getDigestSize()];
+
+        digest.update(data, 0, data.length);
+        digest.doFinal(output, 0);
+
+        return output;
     }
 
     public byte[] getAesKey(byte[] s) {
