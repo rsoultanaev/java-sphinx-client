@@ -36,7 +36,9 @@ public class Group_ECC {
     }
 
     public BigInteger makeexp(byte[] data) {
-        return null;
+        BigInteger bigIntFromData = new BigInteger(data);
+
+        return bigIntFromData.mod(this.order);
     }
 
     public byte[] printable(ECPoint alpha) {
