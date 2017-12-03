@@ -10,11 +10,13 @@ public class SphinxParams {
     private final int keyLength;
     private final int bodyLength;
     private final int headerLength;
+    private final Group_ECC group;
 
     public SphinxParams() {
         this.keyLength = 16;
         this.bodyLength = 1024;
         this.headerLength = 192;
+        this.group = new Group_ECC();
     }
 
     public byte[] aesCtr(byte[] key, byte[] message, byte[] iv) {
