@@ -5,6 +5,9 @@ import org.bouncycastle.crypto.modes.SICBlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+
 public class SphinxParams {
 
     private final int keyLength;
@@ -88,18 +91,26 @@ public class SphinxParams {
     }
 
     public byte[] hrho(byte[] k) {
-        return null;
+        byte[] flavor = "hrhohrhohrhohrho".getBytes(StandardCharsets.US_ASCII);
+
+        return deriveKey(k, flavor);
     }
 
     public byte[] hmu(byte[] k) {
-        return null;
+        byte[] flavor = "hmu:hmu:hmu:hmu:".getBytes(StandardCharsets.US_ASCII);
+
+        return deriveKey(k, flavor);
     }
 
     public byte[] hpi(byte[] k) {
-        return null;
+        byte[] flavor = "hpi:hpi:hpi:hpi:".getBytes(StandardCharsets.US_ASCII);
+
+        return deriveKey(k, flavor);
     }
 
     public byte[] htau(byte[] k) {
-        return null;
+        byte[] flavor = "htauhtauhtauhtau".getBytes(StandardCharsets.US_ASCII);
+
+        return deriveKey(k, flavor);
     }
 }
