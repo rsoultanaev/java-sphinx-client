@@ -7,6 +7,16 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
 
 public class SphinxParams {
 
+    private final int keyLength;
+    private final int bodyLength;
+    private final int headerLength;
+
+    public SphinxParams() {
+        this.keyLength = 16;
+        this.bodyLength = 1024;
+        this.headerLength = 192;
+    }
+
     public byte[] aesCtr(byte[] key, byte[] message, byte[] iv) {
         CipherParameters params = new ParametersWithIV(new KeyParameter(key), iv);
         SICBlockCipher engine = new SICBlockCipher(new AESEngine());
