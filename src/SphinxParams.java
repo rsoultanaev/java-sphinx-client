@@ -78,7 +78,9 @@ public class SphinxParams {
     }
 
     public byte[] deriveKey(byte[] k, byte[] flavor) {
-        return null;
+        byte[] m = new byte[keyLength];
+
+        return aesCtr(k, m, flavor);
     }
 
     public byte[] hb(byte[] alpha, byte[] k) {
