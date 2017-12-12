@@ -99,7 +99,10 @@ public class SphinxParams {
     }
 
     public BigInteger hb(ECPoint alpha, byte[] k) {
-        return null;
+        byte[] flavor = "hbhbhbhbhbhbhbhb".getBytes(StandardCharsets.US_ASCII);
+        byte[] K = deriveKey(k, flavor);
+
+        return group.makeexp(K);
     }
 
     public byte[] hrho(byte[] k) {
