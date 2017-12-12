@@ -1,7 +1,11 @@
+import org.bouncycastle.jce.ECNamedCurveTable;
+import org.bouncycastle.math.ec.ECCurve;
+import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.encoders.Hex;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 
@@ -104,7 +108,14 @@ public class SphinxParams_Test {
 
     @Test
     public void getAesKey() throws Exception {
-        assertTrue(false);
+        byte[] encodedEcPoint = Hex.decode("02a66335a59f1277c193315eb2db69808e6eaf15c944286765c0adcae2");
+        ECCurve ecCurve = ECNamedCurveTable.getParameterSpec("secp224r1").getCurve();
+        ECPoint s = ecCurve.decodePoint(encodedEcPoint);
+
+        byte[] expectedOutput = Hex.decode("ef9706c84715d56800ef8fceb5671d55");
+        byte[] output = params.getAesKey(s);
+
+        assertArrayEquals(expectedOutput, output);
     }
 
     @Test
@@ -119,7 +130,14 @@ public class SphinxParams_Test {
 
     @Test
     public void hb() throws Exception {
-        assertTrue(false);
+        byte[] encodedEcPoint = Hex.decode("02a66335a59f1277c193315eb2db69808e6eaf15c944286765c0adcae2");
+        ECCurve ecCurve = ECNamedCurveTable.getParameterSpec("secp224r1").getCurve();
+        ECPoint alpha = ecCurve.decodePoint(encodedEcPoint);
+
+        BigInteger expectedOutput = new BigInteger("99291632524521846780855783327754112432");
+        BigInteger output = params.hb(alpha, key);
+
+        assertEquals(expectedOutput, output);
     }
 
     @Test
