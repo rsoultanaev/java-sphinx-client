@@ -42,7 +42,7 @@ public class Group_ECC {
     }
 
     public byte[] printable(ECPoint alpha) {
-        return null;
+        return alpha.getEncoded(false);
     }
 
 }
