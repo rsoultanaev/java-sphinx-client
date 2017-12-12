@@ -9,7 +9,7 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.security.spec.ECPoint;
+import org.bouncycastle.math.ec.ECPoint;
 import java.util.Arrays;
 
 public class SphinxParams {
