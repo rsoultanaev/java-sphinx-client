@@ -88,7 +88,7 @@ public class SphinxParams {
         return output;
     }
 
-    public byte[] getAesKey(byte[] s) {
+    public byte[] getAesKey(ECPoint s) {
         return null;
     }
 
