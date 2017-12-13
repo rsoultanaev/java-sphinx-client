@@ -82,7 +82,33 @@ public class SphinxParams {
     }
 
     public byte[] lionessDec(byte[] key, byte[] message) {
-        return null;
+        assert(key.length == keyLength);
+        assert(message.length >= keyLength * 2);
+
+        byte[] r4Short = Arrays.copyOf(message, keyLength);
+        byte[] r4Long = Arrays.copyOfRange(message, keyLength, message.length);
+
+        // Round 4
+        byte[] r3Long = aesCtr(key, r4Long, r4Short);
+        byte[] r3Short = r4Short;
+
+        // Round 3
+        byte[] three = "3".getBytes(StandardCharsets.US_ASCII);
+        byte[] k2 = Arrays.copyOf(hash(concatByteArrays(r3Long, key, three)), keyLength);
+        byte[] r2Short = aesCtr(key, r3Short, k2);
+        byte[] r2Long = r3Long;
+
+        // Round 2
+        byte[] r1Long = aesCtr(key, r2Long, r2Short);
+        byte[] r1Short = r2Short;
+
+        // Round 1
+        byte[] one = "1".getBytes(StandardCharsets.US_ASCII);
+        byte[] k0 = Arrays.copyOf(hash(concatByteArrays(r1Long, key, one)), keyLength);
+        byte[] c = aesCtr(key, r1Short, k0);
+        byte[] r0 = concatByteArrays(c, r1Long);
+
+        return r0;
     }
 
     public byte[] xorRho(byte[] key, byte[] plain) {
