@@ -18,10 +18,6 @@ public class Group_ECC {
         return generator;
     }
 
-    public BigInteger getOrder() {
-        return order;
-    }
-
     public ECPoint expon(ECPoint base, BigInteger exp) {
         return base.multiply(exp);
     }
