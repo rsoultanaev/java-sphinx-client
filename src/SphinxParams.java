@@ -12,7 +12,6 @@ import java.nio.charset.StandardCharsets;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.encoders.Hex;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
 public class SphinxParams {
