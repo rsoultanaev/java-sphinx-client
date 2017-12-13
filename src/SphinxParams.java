@@ -47,7 +47,38 @@ public class SphinxParams {
     }
 
     public byte[] lionessEnc(byte[] key, byte[] message) {
-        return null;
+        assert(key.length == keyLength);
+        assert(message.length >= keyLength * 2);
+
+        // Round 1
+        byte[] messageFirstHalf = Arrays.copyOf(message, keyLength);
+        byte[] messageSecondHalf = Arrays.copyOfRange(message, keyLength, message.length);
+        byte[] one = "1".getBytes(StandardCharsets.US_ASCII);
+        byte[] k1 = Arrays.copyOf(hash(concatByteArrays(messageSecondHalf, key, one)), keyLength);
+        byte[] c = aesCtr(key, messageFirstHalf, k1);
+        byte[] r1 = concatByteArrays(c, messageSecondHalf);
+
+        // Round 2
+        byte[] r1FirstHalf = Arrays.copyOf(r1, keyLength);
+        byte[] r1SecondHalf = Arrays.copyOfRange(r1, keyLength, message.length);
+        c = aesCtr(key, r1SecondHalf, r1FirstHalf);
+        byte[] r2 = concatByteArrays(r1FirstHalf, c);
+
+        // Round 3
+        byte[] r2FirstHalf = Arrays.copyOf(r2, keyLength);
+        byte[] r2SecondHalf = Arrays.copyOfRange(r2, keyLength, message.length);
+        byte[] three = "3".getBytes(StandardCharsets.US_ASCII);
+        byte[] k3 = Arrays.copyOf(hash(concatByteArrays(r2SecondHalf, key, three)), keyLength);
+        c = aesCtr(key, r2FirstHalf, k3);
+        byte[] r3 = concatByteArrays(c, r2SecondHalf);
+
+        // Round 4
+        byte[] r3FirstHalf = Arrays.copyOf(r3, keyLength);
+        byte[] r3SecondHalf = Arrays.copyOfRange(r3, keyLength, message.length);
+        c = aesCtr(key, r3SecondHalf, r3FirstHalf);
+        byte[] r4 = concatByteArrays(r3FirstHalf, c);
+
+        return r4;
     }
 
     public byte[] lionessDec(byte[] key, byte[] message) {
