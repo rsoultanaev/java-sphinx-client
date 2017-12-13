@@ -10,6 +10,9 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import org.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.util.encoders.Hex;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class SphinxParams {
@@ -89,7 +92,13 @@ public class SphinxParams {
     }
 
     public byte[] getAesKey(ECPoint s) {
-        return null;
+        String prefix = Hex.toHexString("aes_key:".getBytes(StandardCharsets.US_ASCII));
+        String printable = Hex.toHexString(group.printable(s));
+
+        byte[] data = Hex.decode(prefix + printable);
+        byte[] hash = hash(data);
+
+        return Arrays.copyOf(hash, keyLength);
     }
 
     public byte[] deriveKey(byte[] k, byte[] flavor) {
