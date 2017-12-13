@@ -91,10 +91,10 @@ public class SphinxParams {
     }
 
     public byte[] getAesKey(ECPoint s) {
-        String prefix = Hex.toHexString("aes_key:".getBytes(StandardCharsets.US_ASCII));
-        String printable = Hex.toHexString(group.printable(s));
+        byte[] prefix = "aes_key:".getBytes(StandardCharsets.US_ASCII);
+        byte[] printable = group.printable(s);
 
-        byte[] data = Hex.decode(prefix + printable);
+        byte[] data = concatByteArrays(prefix, printable);
         byte[] hash = hash(data);
 
         return Arrays.copyOf(hash, keyLength);
@@ -135,5 +135,22 @@ public class SphinxParams {
         byte[] flavor = "htauhtauhtauhtau".getBytes(StandardCharsets.US_ASCII);
 
         return deriveKey(k, flavor);
+    }
+
+    private byte[] concatByteArrays(byte[]... arrays) {
+        int length = 0;
+        for (byte[] array : arrays) {
+            length += array.length;
+        }
+
+        byte[] result = new byte[length];
+
+        int offset = 0;
+        for (byte[] array : arrays) {
+            System.arraycopy(array, 0, result, offset, array.length);
+            offset += array.length;
+        }
+
+        return result;
     }
 }
