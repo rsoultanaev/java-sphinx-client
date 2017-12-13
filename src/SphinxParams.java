@@ -130,11 +130,17 @@ public class SphinxParams {
     }
 
     public byte[] pi(byte[] key, byte[] data) {
-        return null;
+        assert(key.length == keyLength);
+        assert(data.length == bodyLength);
+
+        return lionessEnc(key, data);
     }
 
     public byte[] pii(byte[] key, byte[] data) {
-        return null;
+        assert(key.length == keyLength);
+        assert(data.length == bodyLength);
+
+        return lionessDec(key, data);
     }
 
     public byte[] hash(byte[] data) {

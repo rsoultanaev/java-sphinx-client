@@ -86,8 +86,6 @@ public class SphinxParams_Test {
 
     @Test
     public void piEncryptThenDecrypt() throws Exception {
-        assertTrue(false);
-
         SecureRandom random = new SecureRandom();
         byte[] plaintext = new byte[1024];
         random.nextBytes(plaintext);
