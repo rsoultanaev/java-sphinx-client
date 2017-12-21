@@ -26,8 +26,12 @@ public class SphinxClient {
         SURB_FLAG = new String(surbFlagCharArr);
     }
 
-    byte[] padBody(int msgtotalsize, byte[] body) {
-        return null;
+    byte[] padBody(SphinxParams params, int msgtotalsize, byte[] body) {
+        byte[] padByte = {(byte) 0x7f};
+        byte[] effs = new byte[msgtotalsize - body.length];
+        Arrays.fill(effs, (byte) 0xff);
+
+        return params.concatByteArrays(body, padByte, effs);
     }
 
     byte[] unpadBody(byte[] body) {
@@ -166,7 +170,7 @@ public class SphinxClient {
         Arrays.fill(zeroes, (byte) 0x00);
 
         byte[] body = params.concatByteArrays(zeroes, encodedDestAndMsg);
-        body = padBody(params.getBodyLength(), body);
+        body = padBody(params, params.getBodyLength(), body);
 
         byte[][] secrets = headerAndSecrets.secrets;
         byte[] delta = params.pi(params.hpi(secrets[nodelist.length - 1]), body);
