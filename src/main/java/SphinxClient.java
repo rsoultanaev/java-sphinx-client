@@ -9,7 +9,7 @@ public class SphinxClient {
         return null;
     }
 
-    Node nodeEncoding(int idnum) {
+    byte[] nodeEncoding(int idnum) {
         return null;
     }
     
@@ -17,15 +17,15 @@ public class SphinxClient {
         return null;
     }
 
-    HeaderAndSecrets create_header(SphinxParams params, Node[] nodelist, byte[][] keys, byte[] dest) {
+    HeaderAndSecrets create_header(SphinxParams params, byte[][] nodelist, byte[][] keys, byte[] dest) {
         return null;
     }
 
-    HeaderAndDelta create_forward_message(SphinxParams params, Node[] nodelist, byte[][] keys, byte[] dest, byte[] msg) {
+    HeaderAndDelta create_forward_message(SphinxParams params, byte[][] nodelist, byte[][] keys, byte[] dest, byte[] msg) {
         return null;
     }
 
-    Surb create_surb(SphinxParams params, Node[] nodelist, byte[][] keys, byte[] dest) {
+    Surb create_surb(SphinxParams params, byte[][] nodelist, byte[][] keys, byte[] dest) {
         return null;
     }
 

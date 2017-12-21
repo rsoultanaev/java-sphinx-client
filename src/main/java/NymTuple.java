@@ -1,5 +1,5 @@
 public class NymTuple {
-    public Node node;
+    public byte[] node;
     public Header header;
     public byte[] ktilde;
 }
