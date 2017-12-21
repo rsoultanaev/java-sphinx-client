@@ -202,11 +202,48 @@ public class SphinxClient {
         return null;
     }
 
-    byte[] pack_message(SphinxParams params, SphinxPacket sphinxPacket) {
-        return null;
+    byte[] pack_message(SphinxParams params, SphinxPacket sphinxPacket) throws IOException {
+        MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
+
+        Header header = sphinxPacket.headerAndDelta.header;
+        byte[] delta = sphinxPacket.headerAndDelta.delta;
+        byte[] packedEcPoint = packECPoint(header.alpha);
+
+        packer
+                .packArrayHeader(2)
+                .packArrayHeader(2)
+                .packInt(params.getHeaderLength())
+                .packInt(params.getBodyLength())
+                .packArrayHeader(2)
+                .packArrayHeader(3)
+                .packExtensionTypeHeader((byte) 2, packedEcPoint.length)
+                .writePayload(packedEcPoint)
+                .packBinaryHeader(header.beta.length)
+                .writePayload(header.beta)
+                .packBinaryHeader(header.gamma.length)
+                .writePayload(header.gamma)
+                .packBinaryHeader(delta.length)
+                .writePayload(delta);
+        packer.close();
+
+        return packer.toByteArray();
     }
 
     SphinxPacket unpack_message(HashMap<ParamLengths, SphinxParams> params_dict, byte[] m) {
         return null;
+    }
+
+    byte[] packECPoint(ECPoint ecPoint) throws IOException {
+        byte[] encodedEcPoint = ecPoint.getEncoded(true);
+        int nid = 713;
+
+        MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
+        packer.packArrayHeader(2);
+        packer.packInt(nid);
+        packer.packBinaryHeader(encodedEcPoint.length);
+        packer.writePayload(encodedEcPoint);
+        packer.close();
+
+        return packer.toByteArray();
     }
 }
