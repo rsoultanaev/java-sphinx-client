@@ -14,8 +14,17 @@ public class Group_ECC {
         order = ecSpec.getN();
     }
 
+    // Stub for testing purposes
+    public BigInteger genSecret() {
+        return order;
+    }
+
     public ECPoint getGenerator() {
         return generator;
+    }
+
+    public BigInteger getOrder() {
+        return order;
     }
 
     public ECPoint expon(ECPoint base, BigInteger exp) {
