@@ -204,8 +204,11 @@ public class SphinxClient {
         return null;
     }
 
-    byte[] pack_message(SphinxParams params, SphinxPacket sphinxPacket) throws IOException {
+    byte[] pack_message(SphinxPacket sphinxPacket) throws IOException {
         MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
+
+        int headerLength = sphinxPacket.paramLengths.maxLength;
+        int bodyLength = sphinxPacket.paramLengths.bodyLength;
 
         Header header = sphinxPacket.headerAndDelta.header;
         byte[] delta = sphinxPacket.headerAndDelta.delta;
@@ -214,8 +217,8 @@ public class SphinxClient {
         packer
                 .packArrayHeader(2)
                 .packArrayHeader(2)
-                .packInt(params.getHeaderLength())
-                .packInt(params.getBodyLength())
+                .packInt(headerLength)
+                .packInt(bodyLength)
                 .packArrayHeader(2)
                 .packArrayHeader(3)
                 .packExtensionTypeHeader((byte) 2, packedEcPoint.length)
@@ -231,7 +234,7 @@ public class SphinxClient {
         return packer.toByteArray();
     }
 
-    SphinxPacket unpack_message(HashMap<ParamLengths, SphinxParams> params_dict, byte[] m) {
+    SphinxPacket unpack_message(byte[] m) {
         return null;
     }
 
