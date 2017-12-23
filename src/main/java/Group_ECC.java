@@ -1,6 +1,8 @@
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.jce.spec.ECParameterSpec;
+import org.bouncycastle.util.encoders.Hex;
+
 import java.math.BigInteger;
 import java.util.List;
 
@@ -14,8 +16,17 @@ public class Group_ECC {
         order = ecSpec.getN();
     }
 
+    // Stub for testing purposes
+    public BigInteger genSecret() {
+        return new BigInteger("13098752435730753987543058394759384753938479");
+    }
+
     public ECPoint getGenerator() {
         return generator;
+    }
+
+    public BigInteger getOrder() {
+        return order;
     }
 
     public ECPoint expon(ECPoint base, BigInteger exp) {
@@ -32,7 +43,8 @@ public class Group_ECC {
     }
 
     public BigInteger makeexp(byte[] data) {
-        BigInteger bigIntFromData = new BigInteger(data);
+        // Treat data as an unsigned value
+        BigInteger bigIntFromData = new BigInteger(1, data);
 
         return bigIntFromData.mod(this.order);
     }

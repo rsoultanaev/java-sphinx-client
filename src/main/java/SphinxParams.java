@@ -28,6 +28,22 @@ public class SphinxParams {
         this.group = new Group_ECC();
     }
 
+    public int getKeyLength() {
+        return keyLength;
+    }
+
+    public int getBodyLength() {
+        return bodyLength;
+    }
+
+    public int getHeaderLength() {
+        return headerLength;
+    }
+
+    public Group_ECC getGroup() {
+        return group;
+    }
+
     public byte[] aesCtr(byte[] key, byte[] message, byte[] iv) {
         CipherParameters params = new ParametersWithIV(new KeyParameter(key), iv);
         SICBlockCipher engine = new SICBlockCipher(new AESEngine());
@@ -200,7 +216,7 @@ public class SphinxParams {
         return deriveKey(k, flavor);
     }
 
-    private byte[] concatByteArrays(byte[]... arrays) {
+    public byte[] concatByteArrays(byte[]... arrays) {
         int length = 0;
         for (byte[] array : arrays) {
             length += array.length;
