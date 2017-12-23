@@ -28,7 +28,7 @@ public class SphinxClient {
 
     byte[] padBody(SphinxParams params, int msgtotalsize, byte[] body) {
         byte[] padByte = {(byte) 0x7f};
-        byte[] effs = new byte[msgtotalsize - body.length];
+        byte[] effs = new byte[msgtotalsize - (body.length + 1)];
         Arrays.fill(effs, (byte) 0xff);
 
         return params.concatByteArrays(body, padByte, effs);
