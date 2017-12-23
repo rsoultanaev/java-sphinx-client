@@ -49,12 +49,17 @@ public class Group_ECC_Test {
 
     @Test
     public void makeexp() throws Exception {
-        byte[] data = Hex.decode("03085f86c52bbb391e7fba0dd1e39541fe89ac5b6afd576c338948abe0");
+        byte[] data1 = Hex.decode("03085f86c52bbb391e7fba0dd1e39541fe89ac5b6afd576c338948abe0");
+        byte[] data2 = Hex.decode("e53c7751c276d49da8a6dacbfd1b9a0b");
 
-        BigInteger expectedOutput = new BigInteger("881795633944098057513291471553876590759951853908507227127236799785");
-        BigInteger output = group_ecc.makeexp(data);
+        BigInteger expectedOutput1 = new BigInteger("881795633944098057513291471553876590759951853908507227127236799785");
+        BigInteger expectedOutput2 = new BigInteger("304707168930665571958916740110488410635");
 
-        assertEquals(expectedOutput, output);
+        BigInteger output1 = group_ecc.makeexp(data1);
+        BigInteger output2 = group_ecc.makeexp(data2);
+
+        assertEquals(expectedOutput1, output1);
+        assertEquals(expectedOutput2, output2);
     }
 
     @Test
