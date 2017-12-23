@@ -16,7 +16,7 @@ public class Group_ECC {
 
     // Stub for testing purposes
     public BigInteger genSecret() {
-        return order;
+        return new BigInteger("13098752435730753987543058394759384753938479");
     }
 
     public ECPoint getGenerator() {
