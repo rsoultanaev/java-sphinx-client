@@ -159,6 +159,7 @@ public class SphinxClient {
         HeaderAndSecrets headerAndSecrets = create_header(params, nodelist, keys, finalDestination);
 
         packer = MessagePack.newDefaultBufferPacker();
+        packer.packArrayHeader(2);
         packer.packBinaryHeader(destinationAndMessage.destination.length);
         packer.writePayload(destinationAndMessage.destination);
         packer.packBinaryHeader(destinationAndMessage.message.length);
