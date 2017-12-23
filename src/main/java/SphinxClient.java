@@ -89,7 +89,8 @@ public class SphinxClient {
 
             byte[] zeroes2 = new byte[min_len];
             Arrays.fill(zeroes2, (byte) 0x00);
-            phi = params.xorRho(params.hrho(asbtuples.get(i).aes_s), zeroes2);
+            byte[] zeroes2plain = params.concatByteArrays(zeroes2, plain);
+            phi = params.xorRho(params.hrho(asbtuples.get(i-1).aes_s), zeroes2plain);
             phi = Arrays.copyOfRange(phi, min_len, phi.length);
 
             min_len -= node_meta[i].length + params.getKeyLength();
