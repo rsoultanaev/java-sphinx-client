@@ -54,12 +54,19 @@ public class SphinxClient {
         return ret;
     }
 
-    byte[] nodeEncoding(int idnum) {
-        return null;
+    byte[] nodeEncoding(int idnum) throws IOException {
+        MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
+        packer.packArrayHeader(2);
+        packer.packString(RELAY_FLAG);
+        packer.packInt(idnum);
+        packer.close();
+
+        return packer.toByteArray();
     }
-    
-    int[] randSubset(int[] lst, int nu) {
-        return null;
+
+    byte[] randSubset(byte[] lst, int nu) {
+        // Stub for testing purposes
+        return Arrays.copyOf(lst, nu);
     }
 
     HeaderAndSecrets create_header(SphinxParams params, byte[][] nodelist, ECPoint[] keys, byte[] dest) {
