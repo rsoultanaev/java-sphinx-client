@@ -54,8 +54,14 @@ public class SphinxClient {
         return ret;
     }
 
-    byte[] nodeEncoding(int idnum) {
-        return null;
+    byte[] nodeEncoding(int idnum) throws IOException {
+        MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
+        packer.packArrayHeader(2);
+        packer.packString(RELAY_FLAG);
+        packer.packInt(idnum);
+        packer.close();
+
+        return packer.toByteArray();
     }
     
     int[] randSubset(int[] lst, int nu) {
