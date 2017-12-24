@@ -1,3 +1,7 @@
+# My additions
+*.swp
+Playground.java
+
 # IntelliJ IDEA files
 .idea/
 *.iml
