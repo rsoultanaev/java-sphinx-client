@@ -1,4 +1,7 @@
+import org.bouncycastle.jce.ECNamedCurveTable;
+import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
+import org.msgpack.core.ExtensionTypeHeader;
 import org.msgpack.core.MessageBufferPacker;
 import org.msgpack.core.MessagePack;
 import org.msgpack.core.MessageUnpacker;
@@ -267,8 +270,49 @@ public class SphinxClient {
         return packer.toByteArray();
     }
 
-    SphinxPacket unpack_message(byte[] m) {
-        return null;
+    SphinxPacket unpack_message(byte[] m) throws IOException {
+        MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(m);
+        unpacker.unpackArrayHeader();
+        unpacker.unpackArrayHeader();
+        int headerLength = unpacker.unpackInt();
+        int bodyLength = unpacker.unpackInt();
+        unpacker.unpackArrayHeader();
+        unpacker.unpackArrayHeader();
+        int alphaLength = unpacker.unpackExtensionTypeHeader().getLength();
+        byte[] packedAlpha = unpacker.readPayload(alphaLength);
+        int betaLength = unpacker.unpackBinaryHeader();
+        byte[] beta = unpacker.readPayload(betaLength);
+        int gammaLength = unpacker.unpackBinaryHeader();
+        byte[] gamma = unpacker.readPayload(gammaLength);
+        int deltaLength = unpacker.unpackBinaryHeader();
+        byte[] delta = unpacker.readPayload(deltaLength);
+        unpacker.close();
+
+        unpacker = MessagePack.newDefaultUnpacker(packedAlpha);
+        unpacker.unpackArrayHeader();
+        unpacker.unpackInt();
+        int encodedAlphaLength = unpacker.unpackBinaryHeader();
+        byte[] encodedAlpha = unpacker.readPayload(encodedAlphaLength);
+        unpacker.close();
+
+        ECCurve ecCurve = ECNamedCurveTable.getParameterSpec("secp224r1").getCurve();
+        ECPoint alpha = ecCurve.decodePoint(encodedAlpha);
+
+        ParamLengths paramLengths = new ParamLengths(headerLength, bodyLength);
+        Header header = new Header();
+        header.alpha = alpha;
+        header.beta = beta;
+        header.gamma = gamma;
+
+        HeaderAndDelta headerAndDelta = new HeaderAndDelta();
+        headerAndDelta.header = header;
+        headerAndDelta.delta = delta;
+
+        SphinxPacket sphinxPacket = new SphinxPacket();
+        sphinxPacket.paramLengths = paramLengths;
+        sphinxPacket.headerAndDelta = headerAndDelta;
+
+        return sphinxPacket;
     }
 
     byte[] packECPoint(ECPoint ecPoint) throws IOException {
