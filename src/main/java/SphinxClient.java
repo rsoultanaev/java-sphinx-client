@@ -35,7 +35,21 @@ public class SphinxClient {
     }
 
     byte[] unpadBody(byte[] body) {
-        return null;
+        int l = body.length - 1;
+        byte x_marker = (byte) 0x7f;
+        byte f_marker = (byte) 0xff;
+
+        while (body[l] == f_marker && l > 0) {
+            l--;
+        }
+
+        byte[] ret = {};
+
+        if (body[l] == x_marker) {
+            ret = Arrays.copyOf(body, l);
+        }
+
+        return ret;
     }
 
     byte[] nodeEncoding(int idnum) {
