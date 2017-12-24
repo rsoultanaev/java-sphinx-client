@@ -259,7 +259,17 @@ public class SphinxClient {
     }
 
     HeaderAndDelta package_surb(SphinxParams params, NymTuple nymTuple, byte[] message) {
-        return null;
+        byte[] zeroes = new byte[params.getKeyLength()];
+        Arrays.fill(zeroes, (byte) 0x00);
+        byte[] zeroPaddedMessage = params.concatByteArrays(zeroes, message);
+        byte[] body = padBody(params, params.getBodyLength(), zeroPaddedMessage);
+        byte[] delta = params.pi(nymTuple.ktilde, body);
+
+        HeaderAndDelta headerAndDelta = new HeaderAndDelta();
+        headerAndDelta.header = nymTuple.header;
+        headerAndDelta.delta = delta;
+
+        return headerAndDelta;
     }
 
     DestinationAndMessage receiveForward(SphinxParams params, byte[] delta) throws IOException {
