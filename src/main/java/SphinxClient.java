@@ -1,6 +1,7 @@
 import org.bouncycastle.math.ec.ECPoint;
 import org.msgpack.core.MessageBufferPacker;
 import org.msgpack.core.MessagePack;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -210,8 +211,26 @@ public class SphinxClient {
         return null;
     }
 
-    DestinationAndMessage receiveForward(SphinxParams params, byte[] delta) {
-        return null;
+    DestinationAndMessage receiveForward(SphinxParams params, byte[] delta) throws IOException {
+        byte[] zeroes = new byte[params.getKeyLength()];
+        Arrays.fill(zeroes, (byte) 0x00);
+
+        assert(Arrays.equals(Arrays.copyOf(delta, params.getKeyLength()), zeroes));
+
+        byte[] encodedDestAndMsg = unpadBody(Arrays.copyOfRange(delta, params.getKeyLength(), delta.length));
+        MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(encodedDestAndMsg);
+        unpacker.unpackArrayHeader();
+        int destLength = unpacker.unpackBinaryHeader();
+        byte[] destination = unpacker.readPayload(destLength);
+        int msgLength = unpacker.unpackBinaryHeader();
+        byte[] message = unpacker.readPayload(msgLength);
+        unpacker.close();
+
+        DestinationAndMessage destinationAndMessage = new DestinationAndMessage();
+        destinationAndMessage.destination = destination;
+        destinationAndMessage.message = message;
+
+        return destinationAndMessage;
     }
 
     byte[] receiveSurb(SphinxParams params, byte[][] keytuple, byte[] delta) {
