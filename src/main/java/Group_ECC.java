@@ -1,9 +1,10 @@
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.jce.spec.ECParameterSpec;
-import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.BigIntegers;
 
 import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.List;
 
 public class Group_ECC {
@@ -15,10 +16,12 @@ public class Group_ECC {
         generator = ecSpec.getG();
         order = ecSpec.getN();
     }
-
-    // Stub for testing purposes
+    
     public BigInteger genSecret() {
-        return new BigInteger("13098752435730753987543058394759384753938479");
+        SecureRandom secureRandom = new SecureRandom();
+        BigInteger lowerBound = BigInteger.ZERO;
+        BigInteger upperBound = order.subtract(BigInteger.ONE);
+        return BigIntegers.createRandomInRange(lowerBound, upperBound, secureRandom);
     }
 
     public ECPoint getGenerator() {
