@@ -63,9 +63,10 @@ public class SphinxClient {
 
         return packer.toByteArray();
     }
-    
-    int[] randSubset(int[] lst, int nu) {
-        return null;
+
+    byte[] randSubset(byte[] lst, int nu) {
+        // Stub for testing purposes
+        return Arrays.copyOf(lst, nu);
     }
 
     HeaderAndSecrets create_header(SphinxParams params, byte[][] nodelist, ECPoint[] keys, byte[] dest) {
