@@ -211,8 +211,51 @@ public class SphinxClient {
         return headerAndDelta;
     }
 
-    Surb create_surb(SphinxParams params, byte[][] nodelist, byte[][] keys, byte[] dest) {
-        return null;
+    Surb create_surb(SphinxParams params, byte[][] nodelist, ECPoint[] keys, byte[] dest) throws IOException {
+
+        int nu = nodelist.length;
+
+        // Stub for testing purposes
+        byte[] xid = new byte[params.getKeyLength()];
+
+        MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
+        packer.packArrayHeader(3);
+        packer.packString(SURB_FLAG);
+        packer.packBinaryHeader(dest.length);
+        packer.writePayload(dest);
+        packer.packBinaryHeader(xid.length);
+        packer.writePayload(xid);
+        packer.close();
+
+        byte[] final_dest = packer.toByteArray();
+        HeaderAndSecrets headerAndSecrets = create_header(params, nodelist, keys, final_dest);
+
+        // Stub for testing purposes
+        byte[] ktilde = new byte[params.getKeyLength()];
+
+        byte[][] hashedSecrets = new byte[headerAndSecrets.secrets.length][];
+        for (int i = 0; i < hashedSecrets.length; i++) {
+            hashedSecrets[i] = params.hpi(headerAndSecrets.secrets[i]);
+        }
+
+        byte[][] keytuple = new byte[hashedSecrets.length + 1][];
+        keytuple[0] = ktilde;
+
+        for (int i = 1; i < keytuple.length; i++) {
+            keytuple[i] = hashedSecrets[i - 1];
+        }
+
+        NymTuple nymTuple = new NymTuple();
+        nymTuple.node = nodelist[0];
+        nymTuple.header = headerAndSecrets.header;
+        nymTuple.ktilde = ktilde;
+
+        Surb surb = new Surb();
+        surb.xid = xid;
+        surb.keytuple = keytuple;
+        surb.nymTuple = nymTuple;
+
+        return surb;
     }
 
     HeaderAndDelta package_surb(SphinxParams params, NymTuple nymTuple, byte[] message) {
