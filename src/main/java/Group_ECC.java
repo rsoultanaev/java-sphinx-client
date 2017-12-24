@@ -16,7 +16,7 @@ public class Group_ECC {
         generator = ecSpec.getG();
         order = ecSpec.getN();
     }
-    
+
     public BigInteger genSecret() {
         SecureRandom secureRandom = new SecureRandom();
         BigInteger lowerBound = BigInteger.ZERO;
