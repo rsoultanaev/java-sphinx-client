@@ -8,8 +8,10 @@ import org.msgpack.core.MessageUnpacker;
 import java.io.IOException;
 import java.math.BigInteger;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 public class SphinxClient {
@@ -65,8 +67,30 @@ public class SphinxClient {
     }
 
     byte[] randSubset(byte[] lst, int nu) {
-        // Stub for testing purposes
-        return Arrays.copyOf(lst, nu);
+        assert(lst.length >= nu);
+
+        SecureRandom secureRandom = new SecureRandom();
+
+        long[] randoms = new long[lst.length];
+        for (int i = 0; i < randoms.length; i++) {
+            byte[] rand = new byte[8];
+            secureRandom.nextBytes(rand);
+            randoms[i] = (new BigInteger(1, rand)).longValue();
+        }
+
+        HashMap<Long, Integer> randToIndex = new HashMap<Long, Integer>();
+        for (int i = 0; i < randoms.length; i++) {
+            randToIndex.put(randoms[i], i);
+        }
+
+        Arrays.sort(randoms);
+
+        byte[] result = new byte[nu];
+        for (int i = 0; i < nu; i++) {
+            result[i] = lst[randToIndex.get(randoms[i])];
+        }
+
+        return result;
     }
 
     HeaderAndSecrets create_header(SphinxParams params, byte[][] nodelist, ECPoint[] keys, byte[] dest) {
@@ -132,8 +156,9 @@ public class SphinxClient {
         int random_pad_len = (params.getHeaderLength() - 32) - len_meta - (nu-1)*params.getKeyLength() - final_routing.length;
         assert(random_pad_len >= 0);
 
-        // Stub for testing purposes
+        SecureRandom secureRandom = new SecureRandom();
         byte[] random_pad = new byte[random_pad_len];
+        secureRandom.nextBytes(random_pad);
 
         byte[] beta = params.concatByteArrays(final_routing, random_pad);
         beta = params.xorRho(params.hrho(asbtuples.get(nu - 1).aes_s), beta);
@@ -212,11 +237,11 @@ public class SphinxClient {
     }
 
     Surb create_surb(SphinxParams params, byte[][] nodelist, ECPoint[] keys, byte[] dest) throws IOException {
-
+        SecureRandom secureRandom = new SecureRandom();
         int nu = nodelist.length;
 
-        // Stub for testing purposes
         byte[] xid = new byte[params.getKeyLength()];
+        secureRandom.nextBytes(xid);
 
         MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
         packer.packArrayHeader(3);
@@ -230,8 +255,8 @@ public class SphinxClient {
         byte[] final_dest = packer.toByteArray();
         HeaderAndSecrets headerAndSecrets = create_header(params, nodelist, keys, final_dest);
 
-        // Stub for testing purposes
         byte[] ktilde = new byte[params.getKeyLength()];
+        secureRandom.nextBytes(ktilde);
 
         byte[][] hashedSecrets = new byte[headerAndSecrets.secrets.length][];
         for (int i = 0; i < hashedSecrets.length; i++) {
