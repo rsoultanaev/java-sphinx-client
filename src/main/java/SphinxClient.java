@@ -295,7 +295,20 @@ public class SphinxClient {
     }
 
     byte[] receiveSurb(SphinxParams params, byte[][] keytuple, byte[] delta) {
-        return null;
+        byte[] ktilde = keytuple[0];
+        for (int i = keytuple.length - 1; i > 0; i--) {
+            delta = params.pi(keytuple[i], delta);
+        }
+        delta = params.pii(ktilde, delta);
+
+        byte[] zeroes = new byte[params.getKeyLength()];
+        Arrays.fill(zeroes, (byte) 0x00);
+
+        assert(Arrays.equals(Arrays.copyOf(delta, params.getKeyLength()), zeroes));
+
+        byte[] msg = unpadBody(Arrays.copyOfRange(delta, params.getKeyLength(), delta.length));
+
+        return msg;
     }
 
     byte[] pack_message(SphinxPacket sphinxPacket) throws IOException {
