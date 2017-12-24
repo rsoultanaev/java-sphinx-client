@@ -211,12 +211,65 @@ public class SphinxClient {
         return headerAndDelta;
     }
 
-    Surb create_surb(SphinxParams params, byte[][] nodelist, byte[][] keys, byte[] dest) {
-        return null;
+    Surb create_surb(SphinxParams params, byte[][] nodelist, ECPoint[] keys, byte[] dest) throws IOException {
+
+        int nu = nodelist.length;
+
+        // Stub for testing purposes
+        byte[] xid = new byte[params.getKeyLength()];
+
+        MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
+        packer.packArrayHeader(3);
+        packer.packString(SURB_FLAG);
+        packer.packBinaryHeader(dest.length);
+        packer.writePayload(dest);
+        packer.packBinaryHeader(xid.length);
+        packer.writePayload(xid);
+        packer.close();
+
+        byte[] final_dest = packer.toByteArray();
+        HeaderAndSecrets headerAndSecrets = create_header(params, nodelist, keys, final_dest);
+
+        // Stub for testing purposes
+        byte[] ktilde = new byte[params.getKeyLength()];
+
+        byte[][] hashedSecrets = new byte[headerAndSecrets.secrets.length][];
+        for (int i = 0; i < hashedSecrets.length; i++) {
+            hashedSecrets[i] = params.hpi(headerAndSecrets.secrets[i]);
+        }
+
+        byte[][] keytuple = new byte[hashedSecrets.length + 1][];
+        keytuple[0] = ktilde;
+
+        for (int i = 1; i < keytuple.length; i++) {
+            keytuple[i] = hashedSecrets[i - 1];
+        }
+
+        NymTuple nymTuple = new NymTuple();
+        nymTuple.node = nodelist[0];
+        nymTuple.header = headerAndSecrets.header;
+        nymTuple.ktilde = ktilde;
+
+        Surb surb = new Surb();
+        surb.xid = xid;
+        surb.keytuple = keytuple;
+        surb.nymTuple = nymTuple;
+
+        return surb;
     }
 
     HeaderAndDelta package_surb(SphinxParams params, NymTuple nymTuple, byte[] message) {
-        return null;
+        byte[] zeroes = new byte[params.getKeyLength()];
+        Arrays.fill(zeroes, (byte) 0x00);
+        byte[] zeroPaddedMessage = params.concatByteArrays(zeroes, message);
+        byte[] body = padBody(params, params.getBodyLength(), zeroPaddedMessage);
+        byte[] delta = params.pi(nymTuple.ktilde, body);
+
+        HeaderAndDelta headerAndDelta = new HeaderAndDelta();
+        headerAndDelta.header = nymTuple.header;
+        headerAndDelta.delta = delta;
+
+        return headerAndDelta;
     }
 
     DestinationAndMessage receiveForward(SphinxParams params, byte[] delta) throws IOException {
@@ -242,7 +295,20 @@ public class SphinxClient {
     }
 
     byte[] receiveSurb(SphinxParams params, byte[][] keytuple, byte[] delta) {
-        return null;
+        byte[] ktilde = keytuple[0];
+        for (int i = keytuple.length - 1; i > 0; i--) {
+            delta = params.pi(keytuple[i], delta);
+        }
+        delta = params.pii(ktilde, delta);
+
+        byte[] zeroes = new byte[params.getKeyLength()];
+        Arrays.fill(zeroes, (byte) 0x00);
+
+        assert(Arrays.equals(Arrays.copyOf(delta, params.getKeyLength()), zeroes));
+
+        byte[] msg = unpadBody(Arrays.copyOfRange(delta, params.getKeyLength(), delta.length));
+
+        return msg;
     }
 
     byte[] pack_message(SphinxPacket sphinxPacket) throws IOException {
