@@ -7,11 +7,11 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.List;
 
-public class Group_ECC {
+public class ECCGroup {
     private final ECPoint generator;
     private final BigInteger order;
 
-    public Group_ECC() {
+    public ECCGroup() {
         ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec("secp224r1");
         generator = ecSpec.getG();
         order = ecSpec.getN();

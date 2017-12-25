@@ -10,7 +10,6 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import org.bouncycastle.math.ec.ECPoint;
-import org.bouncycastle.util.encoders.Hex;
 
 import java.util.Arrays;
 
@@ -19,13 +18,13 @@ public class SphinxParams {
     private final int keyLength;
     private final int bodyLength;
     private final int headerLength;
-    private final Group_ECC group;
+    private final ECCGroup group;
 
     public SphinxParams() {
         this.keyLength = 16;
         this.bodyLength = 1024;
         this.headerLength = 192;
-        this.group = new Group_ECC();
+        this.group = new ECCGroup();
     }
 
     public int getKeyLength() {
@@ -40,7 +39,7 @@ public class SphinxParams {
         return headerLength;
     }
 
-    public Group_ECC getGroup() {
+    public ECCGroup getGroup() {
         return group;
     }
 

@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 public class SphinxNode {
     public static ProcessedPacket sphinxProcess(SphinxParams params, BigInteger secret, HeaderAndDelta headerAndDelta) {
-        Group_ECC group = params.getGroup();
+        ECCGroup group = params.getGroup();
         ECPoint alpha = headerAndDelta.header.alpha;
         byte[] beta = headerAndDelta.header.beta;
         byte[] gamma = headerAndDelta.header.gamma;
@@ -14,27 +14,27 @@ public class SphinxNode {
         // TODO: check that alpha is in the group used by params
 
         ECPoint s = group.expon(alpha, secret);
-        byte[] aes_s = params.getAesKey(s);
+        byte[] aesS = params.getAesKey(s);
 
         assert(beta.length == (params.getHeaderLength() - 32));
-        assert(Arrays.equals(gamma, params.mu(params.hmu(aes_s), beta)));
+        assert(Arrays.equals(gamma, params.mu(params.hmu(aesS), beta)));
 
-        byte[] beta_pad_zeroes = new byte[2 * params.getBodyLength()];
-        Arrays.fill(beta_pad_zeroes, (byte) 0x00);
-        byte[] beta_pad = params.concatByteArrays(beta, beta_pad_zeroes);
+        byte[] betaPadZeroes = new byte[2 * params.getBodyLength()];
+        Arrays.fill(betaPadZeroes, (byte) 0x00);
+        byte[] betaPad = params.concatByteArrays(beta, betaPadZeroes);
 
-        byte[] B = params.xorRho(params.hrho(aes_s), beta_pad);
+        byte[] B = params.xorRho(params.hrho(aesS), betaPad);
 
         byte length = B[0];
         byte[] routing = Arrays.copyOfRange(B, 1, 1 + length);
         byte[] rest = Arrays.copyOfRange(B, 1 + length, B.length);
 
-        byte[] tag = params.htau(aes_s);
-        BigInteger b = params.hb(alpha, aes_s);
+        byte[] tag = params.htau(aesS);
+        BigInteger b = params.hb(alpha, aesS);
         alpha = group.expon(alpha, b);
         gamma = Arrays.copyOf(rest, params.getKeyLength());
         beta = Arrays.copyOfRange(rest, params.getKeyLength(), params.getKeyLength() + (params.getHeaderLength() - 32));
-        delta = params.pii(params.hpi(aes_s), delta);
+        delta = params.pii(params.hpi(aesS), delta);
 
         Header header = new Header();
         header.alpha = alpha;

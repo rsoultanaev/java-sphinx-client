@@ -40,23 +40,23 @@ public class SphinxClient {
 
     byte[] unpadBody(byte[] body) {
         int l = body.length - 1;
-        byte x_marker = (byte) 0x7f;
-        byte f_marker = (byte) 0xff;
+        byte xMarker = (byte) 0x7f;
+        byte fMarker = (byte) 0xff;
 
-        while (body[l] == f_marker && l > 0) {
+        while (body[l] == fMarker && l > 0) {
             l--;
         }
 
         byte[] ret = {};
 
-        if (body[l] == x_marker) {
+        if (body[l] == xMarker) {
             ret = Arrays.copyOf(body, l);
         }
 
         return ret;
     }
 
-    byte[] nodeEncoding(int idnum) throws IOException {
+    byte[] encodeNode(int idnum) throws IOException {
         MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
         packer.packArrayHeader(2);
         packer.packString(RELAY_FLAG);
@@ -93,90 +93,89 @@ public class SphinxClient {
         return result;
     }
 
-    HeaderAndSecrets create_header(SphinxParams params, byte[][] nodelist, ECPoint[] keys, byte[] dest) {
-        byte[][] node_meta = new byte[nodelist.length][];
+    HeaderAndSecrets createHeader(SphinxParams params, byte[][] nodelist, ECPoint[] keys, byte[] dest) {
+        byte[][] nodeMeta = new byte[nodelist.length][];
         for (int i = 0; i < nodelist.length; i++) {
             byte[] node = nodelist[i];
             byte[] nodeLength = {(byte) node.length};
-            node_meta[i] = params.concatByteArrays(nodeLength, node);
+            nodeMeta[i] = params.concatByteArrays(nodeLength, node);
         }
 
         int nu = nodelist.length;
-        Group_ECC group = params.getGroup();
+        ECCGroup group = params.getGroup();
         BigInteger x = group.genSecret();
 
-        BigInteger blind_factor = x;
+        BigInteger blindFactor = x;
         List<HeaderRecord> asbtuples = new ArrayList<HeaderRecord>();
 
         for (ECPoint k : keys) {
-            ECPoint alpha = group.expon(group.getGenerator(), blind_factor);
-            ECPoint s = group.expon(k, blind_factor);
-            byte[] aes_s = params.getAesKey(s);
+            ECPoint alpha = group.expon(group.getGenerator(), blindFactor);
+            ECPoint s = group.expon(k, blindFactor);
+            byte[] aesS = params.getAesKey(s);
 
-            BigInteger b = params.hb(alpha, aes_s);
-            blind_factor = blind_factor.multiply(b);
-            blind_factor = blind_factor.mod(group.getOrder());
+            BigInteger b = params.hb(alpha, aesS);
+            blindFactor = blindFactor.multiply(b);
+            blindFactor = blindFactor.mod(group.getOrder());
 
             HeaderRecord headerRecord = new HeaderRecord();
             headerRecord.alpha = alpha;
             headerRecord.s = s;
             headerRecord.b = b;
-            headerRecord.aes_s = aes_s;
+            headerRecord.aes = aesS;
 
             asbtuples.add(headerRecord);
         }
 
         byte[] phi = {};
-        int min_len = params.getHeaderLength() - 32;
+        int minLen = params.getHeaderLength() - 32;
 
         for (int i = 1; i < nu; i++) {
-            byte[] zeroes1 = new byte[params.getKeyLength() + node_meta[i].length];
+            byte[] zeroes1 = new byte[params.getKeyLength() + nodeMeta[i].length];
             Arrays.fill(zeroes1, (byte) 0x00);
             byte[] plain = params.concatByteArrays(phi, zeroes1);
 
-            byte[] zeroes2 = new byte[min_len];
+            byte[] zeroes2 = new byte[minLen];
             Arrays.fill(zeroes2, (byte) 0x00);
             byte[] zeroes2plain = params.concatByteArrays(zeroes2, plain);
-            phi = params.xorRho(params.hrho(asbtuples.get(i-1).aes_s), zeroes2plain);
-            phi = Arrays.copyOfRange(phi, min_len, phi.length);
+            phi = params.xorRho(params.hrho(asbtuples.get(i-1).aes), zeroes2plain);
+            phi = Arrays.copyOfRange(phi, minLen, phi.length);
 
-            min_len -= node_meta[i].length + params.getKeyLength();
+            minLen -= nodeMeta[i].length + params.getKeyLength();
         }
 
-        int len_meta = 0;
-        for (int i = 1; i < node_meta.length; i++) {
-            len_meta += node_meta[i].length;
+        int lenMeta = 0;
+        for (int i = 1; i < nodeMeta.length; i++) {
+            lenMeta += nodeMeta[i].length;
         }
 
-        assert(phi.length == len_meta + (nu-1)*params.getKeyLength());
+        assert(phi.length == lenMeta + (nu-1)*params.getKeyLength());
 
         byte[] destLength = {(byte) dest.length};
-        byte[] final_routing = params.concatByteArrays(destLength, dest);
+        byte[] finalRouting = params.concatByteArrays(destLength, dest);
 
-        int random_pad_len = (params.getHeaderLength() - 32) - len_meta - (nu-1)*params.getKeyLength() - final_routing.length;
-        assert(random_pad_len >= 0);
+        int randomPadLen = (params.getHeaderLength() - 32) - lenMeta - (nu-1)*params.getKeyLength() - finalRouting.length;
+        assert(randomPadLen >= 0);
 
         SecureRandom secureRandom = new SecureRandom();
-        byte[] random_pad = new byte[random_pad_len];
-        secureRandom.nextBytes(random_pad);
+        byte[] randomPad = new byte[randomPadLen];
+        secureRandom.nextBytes(randomPad);
 
-        byte[] beta = params.concatByteArrays(final_routing, random_pad);
-        beta = params.xorRho(params.hrho(asbtuples.get(nu - 1).aes_s), beta);
+        byte[] beta = params.concatByteArrays(finalRouting, randomPad);
+        beta = params.xorRho(params.hrho(asbtuples.get(nu - 1).aes), beta);
         beta = params.concatByteArrays(beta, phi);
 
-        byte[] gamma = params.mu(params.hmu(asbtuples.get(nu-1).aes_s), beta);
+        byte[] gamma = params.mu(params.hmu(asbtuples.get(nu-1).aes), beta);
 
         for (int i = nu - 2; i >= 0; i--) {
-            byte[] node_id = node_meta[i+1];
+            byte[] nodeId = nodeMeta[i+1];
 
-            int plain_beta_len = (params.getHeaderLength() - 32) - params.getKeyLength() - node_id.length;
-            byte[] plain_beta = Arrays.copyOf(beta, plain_beta_len);
-            byte[] plain = params.concatByteArrays(node_id, gamma, plain_beta);
+            int plainBetaLen = (params.getHeaderLength() - 32) - params.getKeyLength() - nodeId.length;
+            byte[] plainBeta = Arrays.copyOf(beta, plainBetaLen);
+            byte[] plain = params.concatByteArrays(nodeId, gamma, plainBeta);
 
-            beta = params.xorRho(params.hrho(asbtuples.get(i).aes_s), plain);
-            gamma = params.mu(params.hmu(asbtuples.get(i).aes_s), beta);
+            beta = params.xorRho(params.hrho(asbtuples.get(i).aes), plain);
+            gamma = params.mu(params.hmu(asbtuples.get(i).aes), beta);
         }
-
 
         Header header = new Header();
         header.alpha = asbtuples.get(0).alpha;
@@ -185,7 +184,7 @@ public class SphinxClient {
 
         byte[][] secrets = new byte[asbtuples.size()][];
         for (int i = 0; i < asbtuples.size(); i++) {
-            secrets[i] = asbtuples.get(i).aes_s;
+            secrets[i] = asbtuples.get(i).aes;
         }
 
         HeaderAndSecrets headerAndSecrets = new HeaderAndSecrets();
@@ -195,7 +194,7 @@ public class SphinxClient {
         return headerAndSecrets;
     }
 
-    HeaderAndDelta create_forward_message(SphinxParams params, byte[][] nodelist, ECPoint[] keys, DestinationAndMessage destinationAndMessage) throws IOException {
+    HeaderAndDelta createForwardMessage(SphinxParams params, byte[][] nodelist, ECPoint[] keys, DestinationAndMessage destinationAndMessage) throws IOException {
         MessageBufferPacker packer;
 
         packer = MessagePack.newDefaultBufferPacker();
@@ -204,7 +203,7 @@ public class SphinxClient {
         packer.close();
 
         byte[] finalDestination = packer.toByteArray();
-        HeaderAndSecrets headerAndSecrets = create_header(params, nodelist, keys, finalDestination);
+        HeaderAndSecrets headerAndSecrets = createHeader(params, nodelist, keys, finalDestination);
 
         packer = MessagePack.newDefaultBufferPacker();
         packer.packArrayHeader(2);
@@ -236,7 +235,7 @@ public class SphinxClient {
         return headerAndDelta;
     }
 
-    Surb create_surb(SphinxParams params, byte[][] nodelist, ECPoint[] keys, byte[] dest) throws IOException {
+    Surb createSurb(SphinxParams params, byte[][] nodelist, ECPoint[] keys, byte[] dest) throws IOException {
         SecureRandom secureRandom = new SecureRandom();
         int nu = nodelist.length;
 
@@ -252,8 +251,8 @@ public class SphinxClient {
         packer.writePayload(xid);
         packer.close();
 
-        byte[] final_dest = packer.toByteArray();
-        HeaderAndSecrets headerAndSecrets = create_header(params, nodelist, keys, final_dest);
+        byte[] finalDest = packer.toByteArray();
+        HeaderAndSecrets headerAndSecrets = createHeader(params, nodelist, keys, finalDest);
 
         byte[] ktilde = new byte[params.getKeyLength()];
         secureRandom.nextBytes(ktilde);
@@ -283,7 +282,7 @@ public class SphinxClient {
         return surb;
     }
 
-    HeaderAndDelta package_surb(SphinxParams params, NymTuple nymTuple, byte[] message) {
+    HeaderAndDelta packageSurb(SphinxParams params, NymTuple nymTuple, byte[] message) {
         byte[] zeroes = new byte[params.getKeyLength()];
         Arrays.fill(zeroes, (byte) 0x00);
         byte[] zeroPaddedMessage = params.concatByteArrays(zeroes, message);
@@ -336,10 +335,10 @@ public class SphinxClient {
         return msg;
     }
 
-    byte[] pack_message(SphinxPacket sphinxPacket) throws IOException {
+    byte[] packMessage(SphinxPacket sphinxPacket) throws IOException {
         MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
 
-        int headerLength = sphinxPacket.paramLengths.maxLength;
+        int headerLength = sphinxPacket.paramLengths.headerLength;
         int bodyLength = sphinxPacket.paramLengths.bodyLength;
 
         Header header = sphinxPacket.headerAndDelta.header;
@@ -366,7 +365,7 @@ public class SphinxClient {
         return packer.toByteArray();
     }
 
-    SphinxPacket unpack_message(byte[] m) throws IOException {
+    SphinxPacket unpackMessage(byte[] m) throws IOException {
         MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(m);
         unpacker.unpackArrayHeader();
         unpacker.unpackArrayHeader();
