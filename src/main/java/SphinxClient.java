@@ -115,11 +115,7 @@ public class SphinxClient {
             blindFactor = blindFactor.multiply(b);
             blindFactor = blindFactor.mod(group.getOrder());
 
-            HeaderRecord headerRecord = new HeaderRecord();
-            headerRecord.alpha = alpha;
-            headerRecord.s = s;
-            headerRecord.b = b;
-            headerRecord.aes = aesS;
+            HeaderRecord headerRecord = new HeaderRecord(alpha, s, b, aesS);
 
             asbtuples.add(headerRecord);
         }
@@ -175,19 +171,14 @@ public class SphinxClient {
             gamma = params.mu(params.hmu(asbtuples.get(i).aes), beta);
         }
 
-        Header header = new Header();
-        header.alpha = asbtuples.get(0).alpha;
-        header.beta = beta;
-        header.gamma = gamma;
+        Header header = new Header(asbtuples.get(0).alpha, beta, gamma);
 
         byte[][] secrets = new byte[asbtuples.size()][];
         for (int i = 0; i < asbtuples.size(); i++) {
             secrets[i] = asbtuples.get(i).aes;
         }
 
-        HeaderAndSecrets headerAndSecrets = new HeaderAndSecrets();
-        headerAndSecrets.header = header;
-        headerAndSecrets.secrets = secrets;
+        HeaderAndSecrets headerAndSecrets = new HeaderAndSecrets(header, secrets);
 
         return headerAndSecrets;
     }
@@ -226,9 +217,7 @@ public class SphinxClient {
             delta = params.pi(params.hpi(secrets[i]), delta);
         }
 
-        HeaderAndDelta headerAndDelta = new HeaderAndDelta();
-        headerAndDelta.header = headerAndSecrets.header;
-        headerAndDelta.delta = delta;
+        HeaderAndDelta headerAndDelta = new HeaderAndDelta(headerAndSecrets.header, delta);
 
         return headerAndDelta;
     }
@@ -267,15 +256,9 @@ public class SphinxClient {
             keytuple[i] = hashedSecrets[i - 1];
         }
 
-        NymTuple nymTuple = new NymTuple();
-        nymTuple.node = nodelist[0];
-        nymTuple.header = headerAndSecrets.header;
-        nymTuple.ktilde = ktilde;
+        NymTuple nymTuple = new NymTuple(nodelist[0], headerAndSecrets.header, ktilde);
 
-        Surb surb = new Surb();
-        surb.xid = xid;
-        surb.keytuple = keytuple;
-        surb.nymTuple = nymTuple;
+        Surb surb = new Surb(xid, keytuple, nymTuple);
 
         return surb;
     }
@@ -287,9 +270,7 @@ public class SphinxClient {
         byte[] body = padBody(params.getBodyLength(), zeroPaddedMessage);
         byte[] delta = params.pi(nymTuple.ktilde, body);
 
-        HeaderAndDelta headerAndDelta = new HeaderAndDelta();
-        headerAndDelta.header = nymTuple.header;
-        headerAndDelta.delta = delta;
+        HeaderAndDelta headerAndDelta = new HeaderAndDelta(nymTuple.header, delta);
 
         return headerAndDelta;
     }
@@ -309,9 +290,7 @@ public class SphinxClient {
         byte[] message = unpacker.readPayload(msgLength);
         unpacker.close();
 
-        DestinationAndMessage destinationAndMessage = new DestinationAndMessage();
-        destinationAndMessage.destination = destination;
-        destinationAndMessage.message = message;
+        DestinationAndMessage destinationAndMessage = new DestinationAndMessage(destination, message);
 
         return destinationAndMessage;
     }
@@ -391,18 +370,11 @@ public class SphinxClient {
         ECPoint alpha = Util.decodeECPoint(encodedAlpha);
 
         ParamLengths paramLengths = new ParamLengths(headerLength, bodyLength);
-        Header header = new Header();
-        header.alpha = alpha;
-        header.beta = beta;
-        header.gamma = gamma;
+        Header header = new Header(alpha, beta, gamma);
 
-        HeaderAndDelta headerAndDelta = new HeaderAndDelta();
-        headerAndDelta.header = header;
-        headerAndDelta.delta = delta;
+        HeaderAndDelta headerAndDelta = new HeaderAndDelta(header, delta);
 
-        SphinxPacket sphinxPacket = new SphinxPacket();
-        sphinxPacket.paramLengths = paramLengths;
-        sphinxPacket.headerAndDelta = headerAndDelta;
+        SphinxPacket sphinxPacket = new SphinxPacket(paramLengths, headerAndDelta);
 
         return sphinxPacket;
     }
