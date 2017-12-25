@@ -1,5 +1,3 @@
-import org.bouncycastle.jce.ECNamedCurveTable;
-import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
 import org.msgpack.core.MessageBufferPacker;
 import org.msgpack.core.MessagePack;
@@ -390,8 +388,7 @@ public class SphinxClient {
         byte[] encodedAlpha = unpacker.readPayload(encodedAlphaLength);
         unpacker.close();
 
-        ECCurve ecCurve = ECNamedCurveTable.getParameterSpec("secp224r1").getCurve();
-        ECPoint alpha = ecCurve.decodePoint(encodedAlpha);
+        ECPoint alpha = Util.decodeECPoint(encodedAlpha);
 
         ParamLengths paramLengths = new ParamLengths(headerLength, bodyLength);
         Header header = new Header();

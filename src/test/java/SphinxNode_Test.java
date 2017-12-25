@@ -1,5 +1,3 @@
-import org.bouncycastle.jce.ECNamedCurveTable;
-import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.encoders.Hex;
 import org.junit.Test;
@@ -16,8 +14,7 @@ public class SphinxNode_Test {
         BigInteger secret = new BigInteger("8594556911718241073939018500914787396871958538713354284467465626596");
 
         byte[] encodedEcPoint = Hex.decode("0360071b99894f0e9fe6ebc9f5a4ca1763b2aaf965278ea3aa90758a42");
-        ECCurve ecCurve = ECNamedCurveTable.getParameterSpec("secp224r1").getCurve();
-        ECPoint inputAlpha = ecCurve.decodePoint(encodedEcPoint);
+        ECPoint inputAlpha = Util.decodeECPoint(encodedEcPoint);
 
         byte[] inputBeta = Hex.decode("abb7447c35df0c5eb1145077aee0174a0c3f9dcaecd02fd5d027729a2e634b9453c94ad7e34cbdc0e9a6e50349de99761cff056eee32c871f93b3ac9999991732bc3275a39ac685ac1e711876f89cf04d5c5cc150d1abb9bb88beb7df24156be905e8758aad72cae2c567ee7c0dc112c81bc8394482496cd8a5bfb83bd05014107d00e1c7efff71d16bd707f48297f344eecfa72774d44dcab5c612568934ca9");
 
@@ -38,7 +35,7 @@ public class SphinxNode_Test {
         byte[] expectedRouting = Hex.decode("92a2c3b0c40101");
 
         encodedEcPoint = Hex.decode("03b1b56e289a274ad157c54090f1a92b3af27afd6187dbb000813f50e3");
-        ECPoint expectedAlpha = ecCurve.decodePoint(encodedEcPoint);
+        ECPoint expectedAlpha = Util.decodeECPoint(encodedEcPoint);
 
         byte[] expectedBeta = Hex.decode("d7ec470907fcc7972a0f7801cf33ab7faafc3fabbcf7c2bf24a2a1bdfde66f52b67fd0cf6bf50cd13fc4384e5ab85e6e5b9433077f5c79e02de8369692619007c10dce0f3afc3a0f00127bdcf4284112d301e83691af7af7155b131dd8cacb5c5e3bbe8d9e6a8d33c48eef2bfb3641da4c23ba7068e98b5cd90f5e754822637cf09e5d53b1440fadd14c684385d8f4b6272f7007b8945898a63e9b33fd4d7e35");
 

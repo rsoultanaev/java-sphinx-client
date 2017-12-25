@@ -1,3 +1,7 @@
+import org.bouncycastle.jce.ECNamedCurveTable;
+import org.bouncycastle.math.ec.ECCurve;
+import org.bouncycastle.math.ec.ECPoint;
+
 public class Util {
     public static byte[] concatByteArrays(byte[]... arrays) {
         int length = 0;
@@ -14,5 +18,10 @@ public class Util {
         }
 
         return result;
+    }
+
+    public static ECPoint decodeECPoint(byte[] encodedECPoint) {
+        ECCurve ecCurve = ECNamedCurveTable.getParameterSpec("secp224r1").getCurve();
+        return ecCurve.decodePoint(encodedECPoint);
     }
 }

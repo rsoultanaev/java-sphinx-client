@@ -1,5 +1,3 @@
-import org.bouncycastle.jce.ECNamedCurveTable;
-import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.encoders.Hex;
 import org.junit.Before;
@@ -64,8 +62,7 @@ public class ECCGroup_Test {
     @Test
     public void printable() throws Exception {
         byte[] encodedEcPoint = Hex.decode("02a66335a59f1277c193315eb2db69808e6eaf15c944286765c0adcae2");
-        ECCurve ecCurve = ECNamedCurveTable.getParameterSpec("secp224r1").getCurve();
-        ECPoint ecPoint = ecCurve.decodePoint(encodedEcPoint);
+        ECPoint ecPoint = Util.decodeECPoint(encodedEcPoint);
 
         byte[] expectedOutput = Hex.decode("04a66335a59f1277c193315eb2db69808e6eaf15c944286765c0adcae21a0a05d040ade5db0d89c90a9ec1970c7642bcaa5bc9319ceee935d0");
         byte[] output = eccGroup.printable(ecPoint);
