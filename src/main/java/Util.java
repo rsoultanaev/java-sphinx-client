@@ -21,7 +21,7 @@ public class Util {
     }
 
     public static ECPoint decodeECPoint(byte[] encodedECPoint) {
-        ECCurve ecCurve = ECNamedCurveTable.getParameterSpec("secp224r1").getCurve();
+        ECCurve ecCurve = ECNamedCurveTable.getParameterSpec(ECCGroup.DEFAULT_CURVE_NAME).getCurve();
         return ecCurve.decodePoint(encodedECPoint);
     }
 }

@@ -15,7 +15,7 @@ public class SphinxClient_Test {
         class PkiEntry {
             BigInteger x;
             ECPoint y;
-            
+
             public PkiEntry(BigInteger x, ECPoint y) {
                 this.x = x;
                 this.y = y;

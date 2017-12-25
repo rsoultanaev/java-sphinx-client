@@ -370,11 +370,10 @@ public class SphinxClient {
 
     private static byte[] packECPoint(ECPoint ecPoint) throws IOException {
         byte[] encodedEcPoint = ecPoint.getEncoded(true);
-        int nid = 713;
 
         MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
         packer.packArrayHeader(2);
-        packer.packInt(nid);
+        packer.packInt(ECCGroup.DEFAULT_CURVE_NID);
         packer.packBinaryHeader(encodedEcPoint.length);
         packer.writePayload(encodedEcPoint);
         packer.close();

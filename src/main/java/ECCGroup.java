@@ -8,11 +8,14 @@ import java.security.SecureRandom;
 import java.util.List;
 
 public class ECCGroup {
+    public static String DEFAULT_CURVE_NAME = "secp224r1";
+    public static int DEFAULT_CURVE_NID = 713;
+
     private final ECPoint generator;
     private final BigInteger order;
 
     public ECCGroup() {
-        ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec("secp224r1");
+        ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec(DEFAULT_CURVE_NAME);
         generator = ecSpec.getG();
         order = ecSpec.getN();
     }
