@@ -50,7 +50,7 @@ public class SphinxClient_Test {
 
         byte[][] nodes_routing = new byte[use_nodes.length][];
         for (int i = 0; i < use_nodes.length; i++) {
-            nodes_routing[i] = client.nodeEncoding(use_nodes[i]);
+            nodes_routing[i] = client.encodeNode(use_nodes[i]);
         }
 
         ECPoint[] node_keys = new ECPoint[use_nodes.length];
@@ -65,7 +65,7 @@ public class SphinxClient_Test {
         destinationAndMessage.destination = dest;
         destinationAndMessage.message = message;
 
-        HeaderAndDelta headerAndDelta = client.create_forward_message(params, nodes_routing, node_keys, destinationAndMessage);
+        HeaderAndDelta headerAndDelta = client.createForwardMessage(params, nodes_routing, node_keys, destinationAndMessage);
 
         ParamLengths paramLengths = new ParamLengths(params.getHeaderLength(), params.getBodyLength());
 
@@ -73,8 +73,8 @@ public class SphinxClient_Test {
         sphinxPacket.paramLengths = paramLengths;
         sphinxPacket.headerAndDelta = headerAndDelta;
 
-        byte[] bin_message = client.pack_message(sphinxPacket);
-        SphinxPacket unpackedSphinxPacket = client.unpack_message(bin_message);
+        byte[] bin_message = client.packMessage(sphinxPacket);
+        SphinxPacket unpackedSphinxPacket = client.unpackMessage(bin_message);
         ParamLengths unpackedParamLengths = unpackedSphinxPacket.paramLengths;
         HeaderAndDelta unpackedHeaderAndDelta = unpackedSphinxPacket.headerAndDelta;
 
@@ -129,8 +129,8 @@ public class SphinxClient_Test {
         byte[] surbDest = "myself".getBytes();
         message = "This is a reply".getBytes();
 
-        Surb surb = client.create_surb(params, nodes_routing, node_keys, surbDest);
-        headerAndDelta = client.package_surb(params, surb.nymTuple, message);
+        Surb surb = client.createSurb(params, nodes_routing, node_keys, surbDest);
+        headerAndDelta = client.packageSurb(params, surb.nymTuple, message);
 
         x = pkiPriv.get(use_nodes[0]).x;
 
