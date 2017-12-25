@@ -1,10 +1,11 @@
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.Arrays;
 import org.junit.Test;
+import org.msgpack.core.MessagePack;
+import org.msgpack.core.MessageUnpacker;
 
 import java.math.BigInteger;
 import java.util.HashMap;
-import java.util.Set;
 
 import static org.junit.Assert.*;
 
@@ -48,13 +49,13 @@ public class SphinxClient_Test {
         int[] use_nodes = client.randSubset(node_pool, r);
 
         byte[][] nodes_routing = new byte[use_nodes.length][];
-        for (int i = 0; i < nodes_routing.length; i++) {
+        for (int i = 0; i < use_nodes.length; i++) {
             nodes_routing[i] = client.nodeEncoding(use_nodes[i]);
         }
 
         ECPoint[] node_keys = new ECPoint[use_nodes.length];
-        for (int i = 0; i < node_keys.length; i++) {
-            node_keys[i] = pkiPub.get(i).y;
+        for (int i = 0; i < use_nodes.length; i++) {
+            node_keys[i] = pkiPub.get(use_nodes[i]).y;
         }
 
         byte[] dest = "bob".getBytes();
@@ -84,61 +85,45 @@ public class SphinxClient_Test {
         assertArrayEquals(headerAndDelta.header.beta, unpackedHeaderAndDelta.header.beta);
         assertArrayEquals(headerAndDelta.header.gamma, unpackedHeaderAndDelta.header.gamma);
         assertArrayEquals(headerAndDelta.delta, unpackedHeaderAndDelta.delta);
+
+        BigInteger x = pkiPriv.get(use_nodes[0]).x;
+
+        MessageUnpacker unpacker;
+
+        while (true) {
+            ProcessedPacket ret = SphinxNode.sphinxProcess(params, x, headerAndDelta);
+            byte[] encodedRouting = ret.routing;
+
+            unpacker = MessagePack.newDefaultUnpacker(encodedRouting);
+            int routingLen = unpacker.unpackArrayHeader();
+            String flag = unpacker.unpackString();
+
+            assertTrue(flag.equals(client.RELAY_FLAG) || flag.equals(client.DEST_FLAG));
+
+            if (flag.equals(client.RELAY_FLAG)) {
+                int addr = unpacker.unpackInt();
+                x = pkiPriv.get(addr).x;
+
+                unpacker.close();
+            } else if (flag.equals(client.DEST_FLAG)) {
+                unpacker.close();
+
+                assertEquals(1, routingLen);
+
+                byte[] zeroes = new byte[params.getKeyLength()];
+                java.util.Arrays.fill(zeroes, (byte) 0x00);
+
+                assertArrayEquals(zeroes, Arrays.copyOf(ret.headerAndDelta.delta, 16));
+
+                DestinationAndMessage destAndMsg = client.receiveForward(params, ret.headerAndDelta.delta);
+
+                assertArrayEquals(dest, destAndMsg.destination);
+                assertArrayEquals(message, destAndMsg.message);
+
+                break;
+            }
+
+            headerAndDelta = ret.headerAndDelta;
+        }
     }
-
-    /*
-    x = pkiPriv[use_nodes[0]].x
-
-    i = 0
-    while True:
-
-        ret = sphinx_process(params, x, header, delta)
-        (tag, B, (header, delta)) = ret
-        routing = PFdecode(params, B)
-
-        print("round %d" % i)
-        i += 1
-
-        # print("Type: %s" % typex)
-        if routing[0] == Relay_flag:
-            addr = routing[1]
-            x = pkiPriv[addr].x
-        elif routing[0] == Dest_flag:
-            assert len(routing) == 1
-            assert delta[:16] == b"\x00" * params.k
-            dec_dest, dec_msg = receive_forward(params, delta)
-            assert dec_dest == dest
-            assert dec_msg == message
-
-            break
-        else:
-            print("Error")
-            assert False
-            break
-
-    # Test the nym creation
-    surbid, surbkeytuple, nymtuple = create_surb(params, nodes_routing, node_keys, b"myself")
-
-    message = b"This is a reply"
-    header, delta = package_surb(params, nymtuple, message)
-
-    x = pkiPriv[use_nodes[0]].x
-
-    while True:
-        ret = sphinx_process(params, x, header, delta)
-        (tag, B, (header, delta)) = ret
-        routing = PFdecode(params, B)
-
-        if routing[0] == Relay_flag:
-            flag, addr = routing
-            x = pkiPriv[addr].x
-        elif routing[0] == Surb_flag:
-            flag, dest, myid = routing
-            break
-
-    received = receive_surb(params, surbkeytuple, delta)
-    assert received == message
-
-    */
-
 }
