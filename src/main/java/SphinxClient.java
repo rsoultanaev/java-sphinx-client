@@ -121,7 +121,7 @@ public class SphinxClient {
             headerRecord.alpha = alpha;
             headerRecord.s = s;
             headerRecord.b = b;
-            headerRecord.aes_s = aes_s;
+            headerRecord.aes = aes_s;
 
             asbtuples.add(headerRecord);
         }
@@ -137,7 +137,7 @@ public class SphinxClient {
             byte[] zeroes2 = new byte[min_len];
             Arrays.fill(zeroes2, (byte) 0x00);
             byte[] zeroes2plain = params.concatByteArrays(zeroes2, plain);
-            phi = params.xorRho(params.hrho(asbtuples.get(i-1).aes_s), zeroes2plain);
+            phi = params.xorRho(params.hrho(asbtuples.get(i-1).aes), zeroes2plain);
             phi = Arrays.copyOfRange(phi, min_len, phi.length);
 
             min_len -= node_meta[i].length + params.getKeyLength();
@@ -161,10 +161,10 @@ public class SphinxClient {
         secureRandom.nextBytes(random_pad);
 
         byte[] beta = params.concatByteArrays(final_routing, random_pad);
-        beta = params.xorRho(params.hrho(asbtuples.get(nu - 1).aes_s), beta);
+        beta = params.xorRho(params.hrho(asbtuples.get(nu - 1).aes), beta);
         beta = params.concatByteArrays(beta, phi);
 
-        byte[] gamma = params.mu(params.hmu(asbtuples.get(nu-1).aes_s), beta);
+        byte[] gamma = params.mu(params.hmu(asbtuples.get(nu-1).aes), beta);
 
         for (int i = nu - 2; i >= 0; i--) {
             byte[] node_id = node_meta[i+1];
@@ -173,8 +173,8 @@ public class SphinxClient {
             byte[] plain_beta = Arrays.copyOf(beta, plain_beta_len);
             byte[] plain = params.concatByteArrays(node_id, gamma, plain_beta);
 
-            beta = params.xorRho(params.hrho(asbtuples.get(i).aes_s), plain);
-            gamma = params.mu(params.hmu(asbtuples.get(i).aes_s), beta);
+            beta = params.xorRho(params.hrho(asbtuples.get(i).aes), plain);
+            gamma = params.mu(params.hmu(asbtuples.get(i).aes), beta);
         }
 
 
@@ -185,7 +185,7 @@ public class SphinxClient {
 
         byte[][] secrets = new byte[asbtuples.size()][];
         for (int i = 0; i < asbtuples.size(); i++) {
-            secrets[i] = asbtuples.get(i).aes_s;
+            secrets[i] = asbtuples.get(i).aes;
         }
 
         HeaderAndSecrets headerAndSecrets = new HeaderAndSecrets();
