@@ -15,6 +15,11 @@ public class SphinxClient_Test {
         class PkiEntry {
             BigInteger x;
             ECPoint y;
+            
+            public PkiEntry(BigInteger x, ECPoint y) {
+                this.x = x;
+                this.y = y;
+            }
         }
 
         SphinxParams params = new SphinxParams();
@@ -28,15 +33,10 @@ public class SphinxClient_Test {
             BigInteger x = params.getGroup().genSecret();
             ECPoint y = params.getGroup().expon(params.getGroup().getGenerator(), x);
 
-            PkiEntry privEntry = new PkiEntry();
-            PkiEntry pubEntry = new PkiEntry();
+            PkiEntry privEntry = new PkiEntry(x, y);
+            PkiEntry pubEntry = new PkiEntry(null, y);
 
-            privEntry.x = x;
-            privEntry.y = y;
             pkiPriv.put(i, privEntry);
-
-            pubEntry.x = null;
-            pubEntry.y = y;
             pkiPub.put(i, pubEntry);
         }
 
@@ -136,7 +136,7 @@ public class SphinxClient_Test {
             byte[] encodedRouting = ret.routing;
 
             unpacker = MessagePack.newDefaultUnpacker(encodedRouting);
-            int routingLen = unpacker.unpackArrayHeader();
+            unpacker.unpackArrayHeader();
             String flag = unpacker.unpackString();
 
             assertTrue(flag.equals(SphinxClient.RELAY_FLAG) || flag.equals(SphinxClient.SURB_FLAG));
