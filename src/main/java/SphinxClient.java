@@ -66,7 +66,7 @@ public class SphinxClient {
         return packer.toByteArray();
     }
 
-    byte[] randSubset(byte[] lst, int nu) {
+    int[] randSubset(int[] lst, int nu) {
         assert(lst.length >= nu);
 
         SecureRandom secureRandom = new SecureRandom();
@@ -85,7 +85,7 @@ public class SphinxClient {
 
         Arrays.sort(randoms);
 
-        byte[] result = new byte[nu];
+        int[] result = new int[nu];
         for (int i = 0; i < nu; i++) {
             result[i] = lst[randToIndex.get(randoms[i])];
         }
