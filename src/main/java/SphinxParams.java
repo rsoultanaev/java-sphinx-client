@@ -8,7 +8,6 @@ import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import org.bouncycastle.math.ec.ECPoint;
 
 import java.util.Arrays;
@@ -68,7 +67,7 @@ public class SphinxParams {
         // Round 1
         byte[] messageShort = Arrays.copyOf(message, keyLength);
         byte[] messageLong = Arrays.copyOfRange(message, keyLength, message.length);
-        byte[] one = "1".getBytes(StandardCharsets.US_ASCII);
+        byte[] one = "1".getBytes();
         byte[] k1 = Arrays.copyOf(hash(Util.concatByteArrays(messageLong, key, one)), keyLength);
         byte[] c = aesCtr(key, messageShort, k1);
         byte[] r1 = Util.concatByteArrays(c, messageLong);
@@ -82,7 +81,7 @@ public class SphinxParams {
         // Round 3
         byte[] r2Short = Arrays.copyOf(r2, keyLength);
         byte[] r2Long = Arrays.copyOfRange(r2, keyLength, message.length);
-        byte[] three = "3".getBytes(StandardCharsets.US_ASCII);
+        byte[] three = "3".getBytes();
         byte[] k3 = Arrays.copyOf(hash(Util.concatByteArrays(r2Long, key, three)), keyLength);
         c = aesCtr(key, r2Short, k3);
         byte[] r3 = Util.concatByteArrays(c, r2Long);
@@ -108,7 +107,7 @@ public class SphinxParams {
         byte[] r3Short = r4Short;
 
         // Round 3
-        byte[] three = "3".getBytes(StandardCharsets.US_ASCII);
+        byte[] three = "3".getBytes();
         byte[] k2 = Arrays.copyOf(hash(Util.concatByteArrays(r3Long, key, three)), keyLength);
         byte[] r2Short = aesCtr(key, r3Short, k2);
         byte[] r2Long = r3Long;
@@ -118,7 +117,7 @@ public class SphinxParams {
         byte[] r1Short = r2Short;
 
         // Round 1
-        byte[] one = "1".getBytes(StandardCharsets.US_ASCII);
+        byte[] one = "1".getBytes();
         byte[] k0 = Arrays.copyOf(hash(Util.concatByteArrays(r1Long, key, one)), keyLength);
         byte[] c = aesCtr(key, r1Short, k0);
         byte[] r0 = Util.concatByteArrays(c, r1Long);
@@ -169,7 +168,7 @@ public class SphinxParams {
     }
 
     public byte[] getAesKey(ECPoint s) {
-        byte[] prefix = "aes_key:".getBytes(StandardCharsets.US_ASCII);
+        byte[] prefix = "aes_key:".getBytes();
         byte[] printable = group.printable(s);
 
         byte[] data = Util.concatByteArrays(prefix, printable);
@@ -185,32 +184,32 @@ public class SphinxParams {
     }
 
     public BigInteger hb(ECPoint alpha, byte[] k) {
-        byte[] flavor = "hbhbhbhbhbhbhbhb".getBytes(StandardCharsets.US_ASCII);
+        byte[] flavor = "hbhbhbhbhbhbhbhb".getBytes();
         byte[] K = deriveKey(k, flavor);
 
         return group.makeexp(K);
     }
 
     public byte[] hrho(byte[] k) {
-        byte[] flavor = "hrhohrhohrhohrho".getBytes(StandardCharsets.US_ASCII);
+        byte[] flavor = "hrhohrhohrhohrho".getBytes();
 
         return deriveKey(k, flavor);
     }
 
     public byte[] hmu(byte[] k) {
-        byte[] flavor = "hmu:hmu:hmu:hmu:".getBytes(StandardCharsets.US_ASCII);
+        byte[] flavor = "hmu:hmu:hmu:hmu:".getBytes();
 
         return deriveKey(k, flavor);
     }
 
     public byte[] hpi(byte[] k) {
-        byte[] flavor = "hpi:hpi:hpi:hpi:".getBytes(StandardCharsets.US_ASCII);
+        byte[] flavor = "hpi:hpi:hpi:hpi:".getBytes();
 
         return deriveKey(k, flavor);
     }
 
     public byte[] htau(byte[] k) {
-        byte[] flavor = "htauhtauhtauhtau".getBytes(StandardCharsets.US_ASCII);
+        byte[] flavor = "htauhtauhtauhtau".getBytes();
 
         return deriveKey(k, flavor);
     }
