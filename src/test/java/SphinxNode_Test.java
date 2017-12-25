@@ -13,7 +13,7 @@ import static org.junit.Assert.*;
 
 public class SphinxNode_Test {
     @Test
-    public void aesCtrEncrypt() throws Exception {
+    public void processSphinxPacket() throws Exception {
         SphinxParams params = new SphinxParams();
 
         BigInteger secret = new BigInteger("8594556911718241073939018500914787396871958538713354284467465626596");
