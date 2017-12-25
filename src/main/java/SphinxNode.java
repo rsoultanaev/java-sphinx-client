@@ -36,19 +36,11 @@ public class SphinxNode {
         beta = Arrays.copyOfRange(rest, params.getKeyLength(), params.getKeyLength() + (params.getHeaderLength() - 32));
         delta = params.pii(params.hpi(aesS), delta);
 
-        Header header = new Header();
-        header.alpha = alpha;
-        header.beta = beta;
-        header.gamma = gamma;
+        Header header = new Header(alpha, beta, gamma);
 
-        HeaderAndDelta headerAndDelta1 = new HeaderAndDelta();
-        headerAndDelta1.header = header;
-        headerAndDelta1.delta = delta;
+        HeaderAndDelta headerAndDelta1 = new HeaderAndDelta(header, delta);
 
-        ProcessedPacket ret = new ProcessedPacket();
-        ret.tag = tag;
-        ret.routing = routing;
-        ret.headerAndDelta = headerAndDelta1;
+        ProcessedPacket ret = new ProcessedPacket(tag, routing, headerAndDelta1);
 
         return ret;
     }

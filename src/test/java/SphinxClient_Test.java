@@ -61,17 +61,13 @@ public class SphinxClient_Test {
         byte[] dest = "bob".getBytes();
         byte[] message = "this is a test".getBytes();
 
-        DestinationAndMessage destinationAndMessage = new DestinationAndMessage();
-        destinationAndMessage.destination = dest;
-        destinationAndMessage.message = message;
+        DestinationAndMessage destinationAndMessage = new DestinationAndMessage(dest, message);
 
         HeaderAndDelta headerAndDelta = client.createForwardMessage(params, nodesRouting, nodeKeys, destinationAndMessage);
 
         ParamLengths paramLengths = new ParamLengths(params.getHeaderLength(), params.getBodyLength());
 
-        SphinxPacket sphinxPacket = new SphinxPacket();
-        sphinxPacket.paramLengths = paramLengths;
-        sphinxPacket.headerAndDelta = headerAndDelta;
+        SphinxPacket sphinxPacket = new SphinxPacket(paramLengths, headerAndDelta);
 
         byte[] binMessage = client.packMessage(sphinxPacket);
         SphinxPacket unpackedSphinxPacket = client.unpackMessage(binMessage);

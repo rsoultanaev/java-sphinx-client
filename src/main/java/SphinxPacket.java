@@ -1,4 +1,9 @@
 public class SphinxPacket {
-    public ParamLengths paramLengths;
-    public HeaderAndDelta headerAndDelta;
+    public final ParamLengths paramLengths;
+    public final HeaderAndDelta headerAndDelta;
+
+    public SphinxPacket(ParamLengths paramLengths, HeaderAndDelta headerAndDelta) {
+        this.paramLengths = paramLengths;
+        this.headerAndDelta = headerAndDelta;
+    }
 }

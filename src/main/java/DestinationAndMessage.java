@@ -1,4 +1,9 @@
 public class DestinationAndMessage {
-    public byte[] destination;
-    public byte[] message;
+    public final byte[] destination;
+    public final byte[] message;
+
+    public DestinationAndMessage(byte[] destination, byte[] message) {
+        this.destination = destination;
+        this.message = message;
+    }
 }
