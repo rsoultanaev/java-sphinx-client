@@ -78,7 +78,7 @@ public class SphinxClient_Test {
         ParamLengths unpackedParamLengths = unpackedSphinxPacket.paramLengths;
         HeaderAndDelta unpackedHeaderAndDelta = unpackedSphinxPacket.headerAndDelta;
 
-        assertEquals(params.getHeaderLength(), unpackedParamLengths.maxLength);
+        assertEquals(params.getHeaderLength(), unpackedParamLengths.headerLength);
         assertEquals(params.getBodyLength(), unpackedParamLengths.bodyLength);
 
         assertEquals(headerAndDelta.header.alpha, unpackedHeaderAndDelta.header.alpha);

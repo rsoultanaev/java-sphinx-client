@@ -1,9 +1,9 @@
 public class ParamLengths {
-    public final int maxLength;
+    public final int headerLength;
     public final int bodyLength;
 
-    public ParamLengths(int maxLength, int bodyLength) {
-        this.maxLength = maxLength;
+    public ParamLengths(int headerLength, int bodyLength) {
+        this.headerLength = headerLength;
         this.bodyLength = bodyLength;
     }
 
@@ -14,13 +14,13 @@ public class ParamLengths {
 
         ParamLengths paramLengths = (ParamLengths) o;
 
-        if (maxLength != paramLengths.maxLength) return false;
+        if (headerLength != paramLengths.headerLength) return false;
         return bodyLength == paramLengths.bodyLength;
     }
 
     @Override
     public int hashCode() {
-        int result = maxLength;
+        int result = headerLength;
         result = 31 * result + bodyLength;
         return result;
     }

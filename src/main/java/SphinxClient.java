@@ -339,7 +339,7 @@ public class SphinxClient {
     byte[] pack_message(SphinxPacket sphinxPacket) throws IOException {
         MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
 
-        int headerLength = sphinxPacket.paramLengths.maxLength;
+        int headerLength = sphinxPacket.paramLengths.headerLength;
         int bodyLength = sphinxPacket.paramLengths.bodyLength;
 
         Header header = sphinxPacket.headerAndDelta.header;
