@@ -17,7 +17,7 @@ public class SphinxClient {
     public static final String DEST_FLAG = new String(new char[]{(char) 0xf1});
     public static final String SURB_FLAG = new String(new char[]{(char) 0xf2});
 
-    public byte[] encodeNode(int idnum) throws IOException {
+    public static byte[] encodeNode(int idnum) throws IOException {
         MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
         packer.packArrayHeader(2);
         packer.packString(RELAY_FLAG);
@@ -27,7 +27,7 @@ public class SphinxClient {
         return packer.toByteArray();
     }
 
-    public int[] randSubset(int[] lst, int nu) {
+    public static int[] randSubset(int[] lst, int nu) {
         assert(lst.length >= nu);
 
         SecureRandom secureRandom = new SecureRandom();
@@ -54,7 +54,7 @@ public class SphinxClient {
         return result;
     }
 
-    public HeaderAndSecrets createHeader(SphinxParams params, byte[][] nodelist, ECPoint[] keys, byte[] dest) {
+    public static HeaderAndSecrets createHeader(SphinxParams params, byte[][] nodelist, ECPoint[] keys, byte[] dest) {
         byte[][] nodeMeta = new byte[nodelist.length][];
         for (int i = 0; i < nodelist.length; i++) {
             byte[] node = nodelist[i];
@@ -146,7 +146,7 @@ public class SphinxClient {
         return headerAndSecrets;
     }
 
-    public HeaderAndDelta createForwardMessage(SphinxParams params, byte[][] nodelist, ECPoint[] keys, DestinationAndMessage destinationAndMessage) throws IOException {
+    public static HeaderAndDelta createForwardMessage(SphinxParams params, byte[][] nodelist, ECPoint[] keys, DestinationAndMessage destinationAndMessage) throws IOException {
         MessageBufferPacker packer;
 
         packer = MessagePack.newDefaultBufferPacker();
@@ -185,7 +185,7 @@ public class SphinxClient {
         return headerAndDelta;
     }
 
-    public Surb createSurb(SphinxParams params, byte[][] nodelist, ECPoint[] keys, byte[] dest) throws IOException {
+    public static Surb createSurb(SphinxParams params, byte[][] nodelist, ECPoint[] keys, byte[] dest) throws IOException {
         SecureRandom secureRandom = new SecureRandom();
         int nu = nodelist.length;
 
@@ -226,7 +226,7 @@ public class SphinxClient {
         return surb;
     }
 
-    public HeaderAndDelta packageSurb(SphinxParams params, NymTuple nymTuple, byte[] message) {
+    public static HeaderAndDelta packageSurb(SphinxParams params, NymTuple nymTuple, byte[] message) {
         byte[] zeroes = new byte[params.getKeyLength()];
         Arrays.fill(zeroes, (byte) 0x00);
         byte[] zeroPaddedMessage = Util.concatByteArrays(zeroes, message);
@@ -238,7 +238,7 @@ public class SphinxClient {
         return headerAndDelta;
     }
 
-    public DestinationAndMessage receiveForward(SphinxParams params, byte[] delta) throws IOException {
+    public static DestinationAndMessage receiveForward(SphinxParams params, byte[] delta) throws IOException {
         byte[] zeroes = new byte[params.getKeyLength()];
         Arrays.fill(zeroes, (byte) 0x00);
 
@@ -258,7 +258,7 @@ public class SphinxClient {
         return destinationAndMessage;
     }
 
-    public byte[] receiveSurb(SphinxParams params, byte[][] keytuple, byte[] delta) {
+    public static byte[] receiveSurb(SphinxParams params, byte[][] keytuple, byte[] delta) {
         byte[] ktilde = keytuple[0];
         for (int i = keytuple.length - 1; i > 0; i--) {
             delta = params.pi(keytuple[i], delta);
@@ -275,7 +275,7 @@ public class SphinxClient {
         return msg;
     }
 
-    public byte[] packMessage(SphinxPacket sphinxPacket) throws IOException {
+    public static byte[] packMessage(SphinxPacket sphinxPacket) throws IOException {
         MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
 
         int headerLength = sphinxPacket.paramLengths.headerLength;
@@ -305,7 +305,7 @@ public class SphinxClient {
         return packer.toByteArray();
     }
 
-    public SphinxPacket unpackMessage(byte[] m) throws IOException {
+    public static SphinxPacket unpackMessage(byte[] m) throws IOException {
         MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(m);
         unpacker.unpackArrayHeader();
         unpacker.unpackArrayHeader();
@@ -342,7 +342,7 @@ public class SphinxClient {
         return sphinxPacket;
     }
 
-    private byte[] padBody(int msgtotalsize, byte[] body) {
+    private static byte[] padBody(int msgtotalsize, byte[] body) {
         byte[] padByte = {(byte) 0x7f};
         byte[] effs = new byte[msgtotalsize - (body.length + 1)];
         Arrays.fill(effs, (byte) 0xff);
@@ -350,7 +350,7 @@ public class SphinxClient {
         return Util.concatByteArrays(body, padByte, effs);
     }
 
-    private byte[] unpadBody(byte[] body) {
+    private static byte[] unpadBody(byte[] body) {
         int l = body.length - 1;
         byte xMarker = (byte) 0x7f;
         byte fMarker = (byte) 0xff;
@@ -368,7 +368,7 @@ public class SphinxClient {
         return ret;
     }
 
-    private byte[] packECPoint(ECPoint ecPoint) throws IOException {
+    private static byte[] packECPoint(ECPoint ecPoint) throws IOException {
         byte[] encodedEcPoint = ecPoint.getEncoded(true);
         int nid = 713;
 
