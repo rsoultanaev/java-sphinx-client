@@ -64,9 +64,8 @@ public class SphinxClient {
 
         int nu = nodelist.length;
         ECCGroup group = params.getGroup();
-        BigInteger x = group.genSecret();
 
-        BigInteger blindFactor = x;
+        BigInteger blindFactor = group.genSecret();
         List<HeaderRecord> asbtuples = new ArrayList<HeaderRecord>();
 
         for (ECPoint k : keys) {
@@ -141,9 +140,7 @@ public class SphinxClient {
             secrets[i] = asbtuples.get(i).aes;
         }
 
-        HeaderAndSecrets headerAndSecrets = new HeaderAndSecrets(header, secrets);
-
-        return headerAndSecrets;
+        return new HeaderAndSecrets(header, secrets);
     }
 
     public static HeaderAndDelta createForwardMessage(SphinxParams params, byte[][] nodelist, ECPoint[] keys, DestinationAndMessage destinationAndMessage) throws IOException {
@@ -180,9 +177,7 @@ public class SphinxClient {
             delta = params.pi(params.hpi(secrets[i]), delta);
         }
 
-        HeaderAndDelta headerAndDelta = new HeaderAndDelta(headerAndSecrets.header, delta);
-
-        return headerAndDelta;
+        return new HeaderAndDelta(headerAndSecrets.header, delta);
     }
 
     public static Surb createSurb(SphinxParams params, byte[][] nodelist, ECPoint[] keys, byte[] dest) throws IOException {
@@ -221,9 +216,7 @@ public class SphinxClient {
 
         NymTuple nymTuple = new NymTuple(nodelist[0], headerAndSecrets.header, ktilde);
 
-        Surb surb = new Surb(xid, keytuple, nymTuple);
-
-        return surb;
+        return new Surb(xid, keytuple, nymTuple);
     }
 
     public static HeaderAndDelta packageSurb(SphinxParams params, NymTuple nymTuple, byte[] message) {
@@ -233,9 +226,7 @@ public class SphinxClient {
         byte[] body = padBody(params.getBodyLength(), zeroPaddedMessage);
         byte[] delta = params.pi(nymTuple.ktilde, body);
 
-        HeaderAndDelta headerAndDelta = new HeaderAndDelta(nymTuple.header, delta);
-
-        return headerAndDelta;
+        return new HeaderAndDelta(nymTuple.header, delta);
     }
 
     public static DestinationAndMessage receiveForward(SphinxParams params, byte[] delta) throws IOException {
@@ -253,9 +244,7 @@ public class SphinxClient {
         byte[] message = unpacker.readPayload(msgLength);
         unpacker.close();
 
-        DestinationAndMessage destinationAndMessage = new DestinationAndMessage(destination, message);
-
-        return destinationAndMessage;
+        return new DestinationAndMessage(destination, message);
     }
 
     public static byte[] receiveSurb(SphinxParams params, byte[][] keytuple, byte[] delta) {
@@ -270,9 +259,7 @@ public class SphinxClient {
 
         assert(Arrays.equals(Arrays.copyOf(delta, params.getKeyLength()), zeroes));
 
-        byte[] msg = unpadBody(Arrays.copyOfRange(delta, params.getKeyLength(), delta.length));
-
-        return msg;
+        return unpadBody(Arrays.copyOfRange(delta, params.getKeyLength(), delta.length));
     }
 
     public static byte[] packMessage(SphinxPacket sphinxPacket) throws IOException {
@@ -337,9 +324,7 @@ public class SphinxClient {
 
         HeaderAndDelta headerAndDelta = new HeaderAndDelta(header, delta);
 
-        SphinxPacket sphinxPacket = new SphinxPacket(paramLengths, headerAndDelta);
-
-        return sphinxPacket;
+        return new SphinxPacket(paramLengths, headerAndDelta);
     }
 
     private static byte[] padBody(int msgtotalsize, byte[] body) {
