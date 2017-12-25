@@ -92,6 +92,8 @@ public class SphinxClient_Test {
 
         while (true) {
             ProcessedPacket ret = SphinxNode.sphinxProcess(params, x, headerAndDelta);
+            headerAndDelta = ret.headerAndDelta;
+
             byte[] encodedRouting = ret.routing;
 
             unpacker = MessagePack.newDefaultUnpacker(encodedRouting);
@@ -122,8 +124,41 @@ public class SphinxClient_Test {
 
                 break;
             }
-
-            headerAndDelta = ret.headerAndDelta;
         }
+
+        byte[] surbDest = "myself".getBytes();
+        message = "This is a reply".getBytes();
+
+        Surb surb = client.create_surb(params, nodes_routing, node_keys, surbDest);
+        headerAndDelta = client.package_surb(params, surb.nymTuple, message);
+
+        x = pkiPriv.get(use_nodes[0]).x;
+
+        while (true) {
+            ProcessedPacket ret = SphinxNode.sphinxProcess(params, x, headerAndDelta);
+            headerAndDelta = ret.headerAndDelta;
+
+            byte[] encodedRouting = ret.routing;
+
+            unpacker = MessagePack.newDefaultUnpacker(encodedRouting);
+            int routingLen = unpacker.unpackArrayHeader();
+            String flag = unpacker.unpackString();
+
+            assertTrue(flag.equals(client.RELAY_FLAG) || flag.equals(client.SURB_FLAG));
+
+            if (flag.equals(client.RELAY_FLAG)) {
+                int addr = unpacker.unpackInt();
+                x = pkiPriv.get(addr).x;
+
+                unpacker.close();
+            } else if (flag.equals(client.SURB_FLAG)) {
+                unpacker.close();
+                break;
+            }
+        }
+
+        byte[] received = client.receiveSurb(params, surb.keytuple, headerAndDelta.delta);
+
+        assertArrayEquals(message, received);
     }
 }
