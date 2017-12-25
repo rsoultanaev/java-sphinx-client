@@ -13,20 +13,9 @@ import java.util.HashMap;
 import java.util.List;
 
 public class SphinxClient {
-    public final String RELAY_FLAG;
-    public final String DEST_FLAG;
-    public final String SURB_FLAG;
-
-    public SphinxClient() {
-        char[] relayFlagCharArr = {(char) 0xf0};
-        RELAY_FLAG = new String(relayFlagCharArr);
-
-        char[] destFlagCharArr = {(char) 0xf1};
-        DEST_FLAG = new String(destFlagCharArr);
-
-        char[] surbFlagCharArr = {(char) 0xf2};
-        SURB_FLAG = new String(surbFlagCharArr);
-    }
+    public static final String RELAY_FLAG = new String(new char[]{(char) 0xf0});
+    public static final String DEST_FLAG = new String(new char[]{(char) 0xf1});
+    public static final String SURB_FLAG = new String(new char[]{(char) 0xf2});
 
     byte[] padBody(int msgtotalsize, byte[] body) {
         byte[] padByte = {(byte) 0x7f};

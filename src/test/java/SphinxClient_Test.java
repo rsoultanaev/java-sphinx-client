@@ -96,14 +96,14 @@ public class SphinxClient_Test {
             int routingLen = unpacker.unpackArrayHeader();
             String flag = unpacker.unpackString();
 
-            assertTrue(flag.equals(client.RELAY_FLAG) || flag.equals(client.DEST_FLAG));
+            assertTrue(flag.equals(SphinxClient.RELAY_FLAG) || flag.equals(SphinxClient.DEST_FLAG));
 
-            if (flag.equals(client.RELAY_FLAG)) {
+            if (flag.equals(SphinxClient.RELAY_FLAG)) {
                 int addr = unpacker.unpackInt();
                 x = pkiPriv.get(addr).x;
 
                 unpacker.close();
-            } else if (flag.equals(client.DEST_FLAG)) {
+            } else if (flag.equals(SphinxClient.DEST_FLAG)) {
                 unpacker.close();
 
                 assertEquals(1, routingLen);
@@ -140,14 +140,14 @@ public class SphinxClient_Test {
             int routingLen = unpacker.unpackArrayHeader();
             String flag = unpacker.unpackString();
 
-            assertTrue(flag.equals(client.RELAY_FLAG) || flag.equals(client.SURB_FLAG));
+            assertTrue(flag.equals(SphinxClient.RELAY_FLAG) || flag.equals(SphinxClient.SURB_FLAG));
 
-            if (flag.equals(client.RELAY_FLAG)) {
+            if (flag.equals(SphinxClient.RELAY_FLAG)) {
                 int addr = unpacker.unpackInt();
                 x = pkiPriv.get(addr).x;
 
                 unpacker.close();
-            } else if (flag.equals(client.SURB_FLAG)) {
+            } else if (flag.equals(SphinxClient.SURB_FLAG)) {
                 unpacker.close();
                 break;
             }
