@@ -102,7 +102,7 @@ public class SphinxClient {
         }
 
         int nu = nodelist.length;
-        Group_ECC group = params.getGroup();
+        ECCGroup group = params.getGroup();
         BigInteger x = group.genSecret();
 
         BigInteger blind_factor = x;

@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 public class SphinxNode {
     public static ProcessedPacket sphinxProcess(SphinxParams params, BigInteger secret, HeaderAndDelta headerAndDelta) {
-        Group_ECC group = params.getGroup();
+        ECCGroup group = params.getGroup();
         ECPoint alpha = headerAndDelta.header.alpha;
         byte[] beta = headerAndDelta.header.beta;
         byte[] gamma = headerAndDelta.header.gamma;
