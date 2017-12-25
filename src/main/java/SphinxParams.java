@@ -69,29 +69,29 @@ public class SphinxParams {
         byte[] messageShort = Arrays.copyOf(message, keyLength);
         byte[] messageLong = Arrays.copyOfRange(message, keyLength, message.length);
         byte[] one = "1".getBytes(StandardCharsets.US_ASCII);
-        byte[] k1 = Arrays.copyOf(hash(concatByteArrays(messageLong, key, one)), keyLength);
+        byte[] k1 = Arrays.copyOf(hash(Util.concatByteArrays(messageLong, key, one)), keyLength);
         byte[] c = aesCtr(key, messageShort, k1);
-        byte[] r1 = concatByteArrays(c, messageLong);
+        byte[] r1 = Util.concatByteArrays(c, messageLong);
 
         // Round 2
         byte[] r1Short = Arrays.copyOf(r1, keyLength);
         byte[] r1Long = Arrays.copyOfRange(r1, keyLength, message.length);
         c = aesCtr(key, r1Long, r1Short);
-        byte[] r2 = concatByteArrays(r1Short, c);
+        byte[] r2 = Util.concatByteArrays(r1Short, c);
 
         // Round 3
         byte[] r2Short = Arrays.copyOf(r2, keyLength);
         byte[] r2Long = Arrays.copyOfRange(r2, keyLength, message.length);
         byte[] three = "3".getBytes(StandardCharsets.US_ASCII);
-        byte[] k3 = Arrays.copyOf(hash(concatByteArrays(r2Long, key, three)), keyLength);
+        byte[] k3 = Arrays.copyOf(hash(Util.concatByteArrays(r2Long, key, three)), keyLength);
         c = aesCtr(key, r2Short, k3);
-        byte[] r3 = concatByteArrays(c, r2Long);
+        byte[] r3 = Util.concatByteArrays(c, r2Long);
 
         // Round 4
         byte[] r3Short = Arrays.copyOf(r3, keyLength);
         byte[] r3Long = Arrays.copyOfRange(r3, keyLength, message.length);
         c = aesCtr(key, r3Long, r3Short);
-        byte[] r4 = concatByteArrays(r3Short, c);
+        byte[] r4 = Util.concatByteArrays(r3Short, c);
 
         return r4;
     }
@@ -109,7 +109,7 @@ public class SphinxParams {
 
         // Round 3
         byte[] three = "3".getBytes(StandardCharsets.US_ASCII);
-        byte[] k2 = Arrays.copyOf(hash(concatByteArrays(r3Long, key, three)), keyLength);
+        byte[] k2 = Arrays.copyOf(hash(Util.concatByteArrays(r3Long, key, three)), keyLength);
         byte[] r2Short = aesCtr(key, r3Short, k2);
         byte[] r2Long = r3Long;
 
@@ -119,9 +119,9 @@ public class SphinxParams {
 
         // Round 1
         byte[] one = "1".getBytes(StandardCharsets.US_ASCII);
-        byte[] k0 = Arrays.copyOf(hash(concatByteArrays(r1Long, key, one)), keyLength);
+        byte[] k0 = Arrays.copyOf(hash(Util.concatByteArrays(r1Long, key, one)), keyLength);
         byte[] c = aesCtr(key, r1Short, k0);
-        byte[] r0 = concatByteArrays(c, r1Long);
+        byte[] r0 = Util.concatByteArrays(c, r1Long);
 
         return r0;
     }
@@ -172,7 +172,7 @@ public class SphinxParams {
         byte[] prefix = "aes_key:".getBytes(StandardCharsets.US_ASCII);
         byte[] printable = group.printable(s);
 
-        byte[] data = concatByteArrays(prefix, printable);
+        byte[] data = Util.concatByteArrays(prefix, printable);
         byte[] hash = hash(data);
 
         return Arrays.copyOf(hash, keyLength);
@@ -213,22 +213,5 @@ public class SphinxParams {
         byte[] flavor = "htauhtauhtauhtau".getBytes(StandardCharsets.US_ASCII);
 
         return deriveKey(k, flavor);
-    }
-
-    public byte[] concatByteArrays(byte[]... arrays) {
-        int length = 0;
-        for (byte[] array : arrays) {
-            length += array.length;
-        }
-
-        byte[] result = new byte[length];
-
-        int offset = 0;
-        for (byte[] array : arrays) {
-            System.arraycopy(array, 0, result, offset, array.length);
-            offset += array.length;
-        }
-
-        return result;
     }
 }
