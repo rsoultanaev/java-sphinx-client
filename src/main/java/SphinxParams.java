@@ -61,8 +61,13 @@ public class SphinxParams {
     }
 
     public byte[] lionessEnc(byte[] key, byte[] message) {
-        assert(key.length == keyLength);
-        assert(message.length >= keyLength * 2);
+        if (key.length != keyLength) {
+            throw new SphinxException("Length of provided key (" + key.length + ") did not match the required key length (" + keyLength + ")");
+        }
+
+        if (message.length < keyLength * 2) {
+            throw new SphinxException("Length of provided message (" + message.length + ") needs to be at least double the length of the key (" + keyLength + ")");
+        }
 
         // Round 1
         byte[] messageShort = Arrays.copyOf(message, keyLength);
@@ -96,8 +101,13 @@ public class SphinxParams {
     }
 
     public byte[] lionessDec(byte[] key, byte[] message) {
-        assert(key.length == keyLength);
-        assert(message.length >= keyLength * 2);
+        if (key.length != keyLength) {
+            throw new SphinxException("Length of provided key (" + key.length + ") did not match the required key length (" + keyLength + ")");
+        }
+
+        if (message.length < keyLength * 2) {
+            throw new SphinxException("Length of provided message (" + message.length + ") needs to be at least double the length of the key (" + keyLength + ")");
+        }
 
         byte[] r4Short = Arrays.copyOf(message, keyLength);
         byte[] r4Long = Arrays.copyOfRange(message, keyLength, message.length);
@@ -126,7 +136,9 @@ public class SphinxParams {
     }
 
     public byte[] xorRho(byte[] key, byte[] plain) {
-        assert (key.length == keyLength);
+        if (key.length != keyLength) {
+            throw new SphinxException("Length of provided key (" + key.length + ") did not match the required key length (" + keyLength + ")");
+        }
 
         return aesCtr(key, plain);
     }
@@ -144,15 +156,25 @@ public class SphinxParams {
     }
 
     public byte[] pi(byte[] key, byte[] data) {
-        assert(key.length == keyLength);
-        assert(data.length == bodyLength);
+        if (key.length != keyLength) {
+            throw new SphinxException("Length of provided key (" + key.length + ") did not match the required key length (" + keyLength + ")");
+        }
+
+        if (data.length != bodyLength) {
+            throw new SphinxException("Length of provided message (" + data.length + ") did not match the required message body length (" + bodyLength + ")");
+        }
 
         return lionessEnc(key, data);
     }
 
     public byte[] pii(byte[] key, byte[] data) {
-        assert(key.length == keyLength);
-        assert(data.length == bodyLength);
+        if (key.length != keyLength) {
+            throw new SphinxException("Length of provided key (" + key.length + ") did not match the required key length (" + keyLength + ")");
+        }
+
+        if (data.length != bodyLength) {
+            throw new SphinxException("Length of provided message (" + data.length + ") did not match the required message body length (" + bodyLength + ")");
+        }
 
         return lionessDec(key, data);
     }
