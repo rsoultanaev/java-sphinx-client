@@ -1,4 +1,5 @@
 import org.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.util.encoders.Hex;
 import org.msgpack.core.MessageBufferPacker;
 import org.msgpack.core.MessagePack;
 import org.msgpack.core.MessageUnpacker;
@@ -28,7 +29,9 @@ public class SphinxClient {
     }
 
     public static int[] randSubset(int[] lst, int nu) {
-        assert(lst.length >= nu);
+        if (lst.length < nu) {
+            throw new SphinxException("Number of possible elements (" + lst.length + ") was less than the requested number (" + nu + ")");
+        }
 
         SecureRandom secureRandom = new SecureRandom();
 
@@ -104,13 +107,17 @@ public class SphinxClient {
             lenMeta += nodeMeta[i].length;
         }
 
-        assert(phi.length == lenMeta + (nu-1)*params.getKeyLength());
+        if (phi.length != lenMeta + (nu-1)*params.getKeyLength()) {
+            throw new SphinxException("Length of phi (" + phi.length + ") did not match the expected length (" + (lenMeta + (nu-1)*params.getKeyLength()) + ")");
+        }
 
         byte[] destLength = {(byte) dest.length};
         byte[] finalRouting = Util.concatByteArrays(destLength, dest);
 
         int randomPadLen = (params.getHeaderLength() - 32) - lenMeta - (nu-1)*params.getKeyLength() - finalRouting.length;
-        assert(randomPadLen >= 0);
+        if (randomPadLen < 0) {
+            throw new SphinxException("Length of random pad (" + randomPadLen + ") must be non-negative");
+        }
 
         SecureRandom secureRandom = new SecureRandom();
         byte[] randomPad = new byte[randomPadLen];
@@ -233,7 +240,11 @@ public class SphinxClient {
         byte[] zeroes = new byte[params.getKeyLength()];
         Arrays.fill(zeroes, (byte) 0x00);
 
-        assert(Arrays.equals(Arrays.copyOf(delta, params.getKeyLength()), zeroes));
+        if (!Arrays.equals(Arrays.copyOf(delta, params.getKeyLength()), zeroes)) {
+            String deltaPrefix = Hex.toHexString(Arrays.copyOf(delta, params.getKeyLength()));
+            String expectedPrefix = Hex.toHexString(zeroes);
+            throw new SphinxException("Prefix of delta (" + deltaPrefix + ") did not match the expected prefix (" + expectedPrefix + ")");
+        }
 
         byte[] encodedDestAndMsg = unpadBody(Arrays.copyOfRange(delta, params.getKeyLength(), delta.length));
         MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(encodedDestAndMsg);
@@ -257,7 +268,11 @@ public class SphinxClient {
         byte[] zeroes = new byte[params.getKeyLength()];
         Arrays.fill(zeroes, (byte) 0x00);
 
-        assert(Arrays.equals(Arrays.copyOf(delta, params.getKeyLength()), zeroes));
+        if (!Arrays.equals(Arrays.copyOf(delta, params.getKeyLength()), zeroes)) {
+            String deltaPrefix = Hex.toHexString(Arrays.copyOf(delta, params.getKeyLength()));
+            String expectedPrefix = Hex.toHexString(zeroes);
+            throw new SphinxException("Prefix of delta (" + deltaPrefix + ") did not match the expected prefix (" + expectedPrefix + ")");
+        }
 
         return unpadBody(Arrays.copyOfRange(delta, params.getKeyLength(), delta.length));
     }
