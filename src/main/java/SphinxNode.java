@@ -16,8 +16,13 @@ public class SphinxNode {
         ECPoint s = group.expon(alpha, secret);
         byte[] aesS = params.getAesKey(s);
 
-        assert(beta.length == (params.getHeaderLength() - 32));
-        assert(Arrays.equals(gamma, params.mu(params.hmu(aesS), beta)));
+        if (beta.length != (params.getHeaderLength() - 32)) {
+            throw new SphinxException("Length of beta (" + beta.length + ") did not match expected length (" + (params.getHeaderLength() - 32) + ")");
+        }
+
+        if (!Arrays.equals(gamma, params.mu(params.hmu(aesS), beta))) {
+            throw new SphinxException("MAC mismatch");
+        }
 
         byte[] betaPadZeroes = new byte[2 * params.getBodyLength()];
         Arrays.fill(betaPadZeroes, (byte) 0x00);
