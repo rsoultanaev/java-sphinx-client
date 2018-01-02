@@ -180,4 +180,33 @@ public class SphinxClient_Test {
 
         assertArrayEquals(message, received);
     }
+
+    @Test(expected = SphinxException.class)
+    public void randSubsetBadNu() throws Exception {
+        int[] nodePool = {0,0,0,0,0};
+        SphinxClient.randSubset(nodePool, nodePool.length + 1);
+    }
+
+    @Test(expected = SphinxException.class)
+    public void receiveForwardBadDelta() throws Exception {
+        byte[] dest = "bob".getBytes();
+        byte[] message = "this is a test".getBytes();
+
+        DestinationAndMessage destinationAndMessage = new DestinationAndMessage(dest, message);
+
+        HeaderAndDelta headerAndDelta = SphinxClient.createForwardMessage(params, nodesRouting, nodeKeys, destinationAndMessage);
+        headerAndDelta.delta[0] = 1;
+        SphinxClient.receiveForward(params, headerAndDelta.delta);
+    }
+
+    @Test(expected = SphinxException.class)
+    public void receiveSurbBadDelta() throws Exception {
+        byte[] surbDest = "myself".getBytes();
+        byte[] message = "This is a reply".getBytes();
+
+        Surb surb = SphinxClient.createSurb(params, nodesRouting, nodeKeys, surbDest);
+        HeaderAndDelta headerAndDelta = SphinxClient.packageSurb(params, surb.nymTuple, message);
+        headerAndDelta.delta[0] = 1;
+        SphinxClient.receiveSurb(params, surb.keytuple, headerAndDelta.delta);
+    }
 }
