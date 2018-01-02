@@ -1,5 +1,6 @@
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.Arrays;
+import org.junit.Before;
 import org.junit.Test;
 import org.msgpack.core.MessagePack;
 import org.msgpack.core.MessageUnpacker;
@@ -10,23 +11,29 @@ import java.util.HashMap;
 import static org.junit.Assert.*;
 
 public class SphinxClient_Test {
-    @Test
-    public void test() throws Exception {
-        class PkiEntry {
-            BigInteger x;
-            ECPoint y;
+    class PkiEntry {
+        BigInteger x;
+        ECPoint y;
 
-            public PkiEntry(BigInteger x, ECPoint y) {
-                this.x = x;
-                this.y = y;
-            }
+        public PkiEntry(BigInteger x, ECPoint y) {
+            this.x = x;
+            this.y = y;
         }
+    }
 
-        SphinxParams params = new SphinxParams();
+    private SphinxParams params;
+    private HashMap<Integer, PkiEntry> pkiPriv;
+    private byte[][] nodesRouting;
+    private ECPoint[] nodeKeys;
+    private int[] useNodes;
+
+    @Before
+    public void setUp() throws Exception {
+        params = new SphinxParams();
 
         int r = 5;
 
-        HashMap<Integer, PkiEntry> pkiPriv = new HashMap<Integer, PkiEntry>();
+        pkiPriv = new HashMap<Integer, PkiEntry>();
         HashMap<Integer, PkiEntry> pkiPub = new HashMap<Integer, PkiEntry>();
 
         for (int i = 0; i < 10; i++) {
@@ -45,18 +52,21 @@ public class SphinxClient_Test {
         for (int i = 0; i < nodePool.length; i++) {
             nodePool[i] = (Integer) pubKeys[i];
         }
-        int[] useNodes = SphinxClient.randSubset(nodePool, r);
+        useNodes = SphinxClient.randSubset(nodePool, r);
 
-        byte[][] nodesRouting = new byte[useNodes.length][];
+        nodesRouting = new byte[useNodes.length][];
         for (int i = 0; i < useNodes.length; i++) {
             nodesRouting[i] = SphinxClient.encodeNode(useNodes[i]);
         }
 
-        ECPoint[] nodeKeys = new ECPoint[useNodes.length];
+        nodeKeys = new ECPoint[useNodes.length];
         for (int i = 0; i < useNodes.length; i++) {
             nodeKeys[i] = pkiPub.get(useNodes[i]).y;
         }
+    }
 
+    @Test
+    public void encodeAndDecode() throws Exception {
         byte[] dest = "bob".getBytes();
         byte[] message = "this is a test".getBytes();
 
@@ -80,6 +90,16 @@ public class SphinxClient_Test {
         assertArrayEquals(headerAndDelta.header.beta, unpackedHeaderAndDelta.header.beta);
         assertArrayEquals(headerAndDelta.header.gamma, unpackedHeaderAndDelta.header.gamma);
         assertArrayEquals(headerAndDelta.delta, unpackedHeaderAndDelta.delta);
+    }
+
+    @Test
+    public void routeSphinxMessage() throws Exception {
+        byte[] dest = "bob".getBytes();
+        byte[] message = "this is a test".getBytes();
+
+        DestinationAndMessage destinationAndMessage = new DestinationAndMessage(dest, message);
+
+        HeaderAndDelta headerAndDelta = SphinxClient.createForwardMessage(params, nodesRouting, nodeKeys, destinationAndMessage);
 
         BigInteger x = pkiPriv.get(useNodes[0]).x;
 
@@ -120,14 +140,18 @@ public class SphinxClient_Test {
                 break;
             }
         }
+    }
 
+    @Test
+    public void routeSurb() throws Exception {
         byte[] surbDest = "myself".getBytes();
-        message = "This is a reply".getBytes();
+        byte[] message = "This is a reply".getBytes();
 
         Surb surb = SphinxClient.createSurb(params, nodesRouting, nodeKeys, surbDest);
-        headerAndDelta = SphinxClient.packageSurb(params, surb.nymTuple, message);
+        HeaderAndDelta headerAndDelta = SphinxClient.packageSurb(params, surb.nymTuple, message);
 
-        x = pkiPriv.get(useNodes[0]).x;
+        BigInteger x = pkiPriv.get(useNodes[0]).x;
+        MessageUnpacker unpacker;
 
         while (true) {
             ProcessedPacket ret = SphinxNode.sphinxProcess(params, x, headerAndDelta);
