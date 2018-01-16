@@ -1,6 +1,7 @@
 # My additions
 *.swp
 Playground.java
+target/
 
 # IntelliJ IDEA files
 .idea/
