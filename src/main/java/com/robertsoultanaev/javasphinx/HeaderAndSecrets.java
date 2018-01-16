@@ -1,3 +1,5 @@
+package com.robertsoultanaev.javasphinx;
+
 public class HeaderAndSecrets {
     public final Header header;
     public final byte[][] secrets;

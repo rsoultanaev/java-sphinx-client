@@ -1,3 +1,5 @@
+package com.robertsoultanaev.javasphinx;
+
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.encoders.Hex;
 import org.msgpack.core.MessageBufferPacker;

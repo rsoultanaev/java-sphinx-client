@@ -1,3 +1,5 @@
+import com.robertsoultanaev.javasphinx.*;
+import com.rsoultanaev.javasphinx.*;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.encoders.Hex;
 import org.junit.Test;

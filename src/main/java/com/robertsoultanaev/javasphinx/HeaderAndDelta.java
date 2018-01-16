@@ -1,3 +1,5 @@
+package com.robertsoultanaev.javasphinx;
+
 public class HeaderAndDelta {
     public final Header header;
     public final byte[] delta;

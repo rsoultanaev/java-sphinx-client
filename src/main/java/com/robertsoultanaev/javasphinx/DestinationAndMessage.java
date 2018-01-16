@@ -1,3 +1,5 @@
+package com.robertsoultanaev.javasphinx;
+
 public class DestinationAndMessage {
     public final byte[] destination;
     public final byte[] message;

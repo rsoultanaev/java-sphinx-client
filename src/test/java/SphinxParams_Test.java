@@ -1,3 +1,6 @@
+import com.robertsoultanaev.javasphinx.SphinxException;
+import com.robertsoultanaev.javasphinx.SphinxParams;
+import com.robertsoultanaev.javasphinx.Util;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;

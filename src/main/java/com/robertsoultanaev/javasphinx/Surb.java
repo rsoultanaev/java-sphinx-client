@@ -1,3 +1,5 @@
+package com.robertsoultanaev.javasphinx;
+
 public class Surb {
     public final byte[] xid;
     public final byte[][] keytuple;

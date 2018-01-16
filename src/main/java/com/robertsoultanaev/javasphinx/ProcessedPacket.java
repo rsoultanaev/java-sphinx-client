@@ -1,3 +1,5 @@
+package com.robertsoultanaev.javasphinx;
+
 public class ProcessedPacket {
     public final byte[] tag;
     public final byte[] routing;

@@ -1,3 +1,5 @@
+package com.robertsoultanaev.javasphinx;
+
 import org.bouncycastle.math.ec.ECPoint;
 
 import java.math.BigInteger;

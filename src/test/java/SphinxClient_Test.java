@@ -1,3 +1,5 @@
+import com.robertsoultanaev.javasphinx.*;
+import com.rsoultanaev.javasphinx.*;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.Arrays;
 import org.junit.Before;
