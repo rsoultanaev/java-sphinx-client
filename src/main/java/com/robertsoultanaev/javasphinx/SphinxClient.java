@@ -20,6 +20,8 @@ public class SphinxClient {
     public static final String DEST_FLAG = new String(new char[]{(char) 0xf1});
     public static final String SURB_FLAG = new String(new char[]{(char) 0xf2});
 
+    public static final int MAX_DEST_SIZE = 127;
+
     public static byte[] encodeNode(int idnum) throws IOException {
         MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
         packer.packArrayHeader(2);
@@ -156,12 +158,8 @@ public class SphinxClient {
         byte[] dest = destinationAndMessage.destination;
         byte[] message = destinationAndMessage.message;
 
-        if (dest.length > 128 || dest.length <= 0) {
-            throw new SphinxException("Destination has to be between 1 and 127 bytes long");
-        }
-
-        if (params.getKeyLength() + 1 + dest.length + message.length >= params.getBodyLength()) {
-            throw new SphinxException("Destination and message too long");
+        if (!(dest.length > 0 && dest.length < MAX_DEST_SIZE)) {
+            throw new SphinxException("Destination has to be between 1 and " + MAX_DEST_SIZE + " bytes long");
         }
 
         MessageBufferPacker packer;
@@ -353,6 +351,19 @@ public class SphinxClient {
         HeaderAndDelta headerAndDelta = new HeaderAndDelta(header, delta);
 
         return new SphinxPacket(paramLengths, headerAndDelta);
+    }
+
+    public static int getMaxPayloadSize(SphinxParams params) {
+        // Added in padBody
+        int padByteLength = 1;
+
+        // Overhead calculation:
+        //   array header for array of length 2 -> 1 byte
+        //   binary header for destination (between 1 and 127 bytes) -> 2 bytes
+        //   binary header for message -> up to 3 bytes
+        int msgPackOverhead = 6;
+
+        return params.getBodyLength() - params.getKeyLength() - padByteLength - msgPackOverhead;
     }
 
     private static byte[] padBody(int msgtotalsize, byte[] body) {
