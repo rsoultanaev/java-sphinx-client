@@ -153,6 +153,14 @@ public class SphinxClient {
     }
 
     public static HeaderAndDelta createForwardMessage(SphinxParams params, byte[][] nodelist, ECPoint[] keys, DestinationAndMessage destinationAndMessage) throws IOException {
+        if (destinationAndMessage.destination.length > 128 || destinationAndMessage.destination.length <= 0) {
+            throw new SphinxException("Destination has to be between 1 and 127 bytes long");
+        }
+
+        if (params.getKeyLength() + 1 + destinationAndMessage.destination.length + destinationAndMessage.message.length >= params.getBodyLength()) {
+            throw new SphinxException("Destination and message too long");
+        }
+
         MessageBufferPacker packer;
 
         packer = MessagePack.newDefaultBufferPacker();
@@ -349,7 +357,13 @@ public class SphinxClient {
         byte[] effs = new byte[msgtotalsize - (body.length + 1)];
         Arrays.fill(effs, (byte) 0xff);
 
-        return Util.concatByteArrays(body, padByte, effs);
+        byte[] paddedBody = Util.concatByteArrays(body, padByte, effs);
+
+        if (msgtotalsize < paddedBody.length) {
+            throw new SphinxException("Insufficient space for message");
+        }
+
+        return paddedBody;
     }
 
     private static byte[] unpadBody(byte[] body) {
