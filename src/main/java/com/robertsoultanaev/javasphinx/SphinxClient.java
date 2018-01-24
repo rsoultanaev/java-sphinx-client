@@ -354,14 +354,20 @@ public class SphinxClient {
     }
 
     public static int getMaxPayloadSize(SphinxParams params) {
+        MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
+        try {
+            packer.packArrayHeader(2);
+            packer.packBinaryHeader(MAX_DEST_SIZE);
+            packer.packBinaryHeader(params.getBodyLength());
+            packer.close();
+        } catch (IOException ex) {
+            throw new SphinxException("Failed to calculate the msgpack overhead");
+        }
+
+        int msgPackOverhead = packer.getBufferSize();
+
         // Added in padBody
         int padByteLength = 1;
-
-        // Overhead calculation:
-        //   array header for array of length 2 -> 1 byte
-        //   binary header for destination (between 1 and 127 bytes) -> 2 bytes
-        //   binary header for message -> up to 3 bytes
-        int msgPackOverhead = 6;
 
         return params.getBodyLength() - params.getKeyLength() - padByteLength - msgPackOverhead;
     }
