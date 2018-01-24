@@ -356,17 +356,17 @@ public class SphinxClient {
     }
 
     private static byte[] padBody(int msgtotalsize, byte[] body) {
-        byte[] padByte = {(byte) 0x7f};
-        byte[] effs = new byte[msgtotalsize - (body.length + 1)];
-        Arrays.fill(effs, (byte) 0xff);
+        byte[] initialPadByte = {(byte) 0x7f};
+        int numPadBytes = msgtotalsize - (body.length + 1);
 
-        byte[] paddedBody = Util.concatByteArrays(body, padByte, effs);
-
-        if (msgtotalsize < paddedBody.length) {
+        if (numPadBytes < 0) {
             throw new SphinxException("Insufficient space for message");
         }
 
-        return paddedBody;
+        byte[] padBytes = new byte[numPadBytes];
+        Arrays.fill(padBytes, (byte) 0xff);
+
+        return Util.concatByteArrays(body, initialPadByte, padBytes);
     }
 
     private static byte[] unpadBody(byte[] body) {
