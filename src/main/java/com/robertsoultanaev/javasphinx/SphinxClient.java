@@ -153,11 +153,14 @@ public class SphinxClient {
     }
 
     public static HeaderAndDelta createForwardMessage(SphinxParams params, byte[][] nodelist, ECPoint[] keys, DestinationAndMessage destinationAndMessage) throws IOException {
-        if (destinationAndMessage.destination.length > 128 || destinationAndMessage.destination.length <= 0) {
+        byte[] dest = destinationAndMessage.destination;
+        byte[] message = destinationAndMessage.message;
+
+        if (dest.length > 128 || dest.length <= 0) {
             throw new SphinxException("Destination has to be between 1 and 127 bytes long");
         }
 
-        if (params.getKeyLength() + 1 + destinationAndMessage.destination.length + destinationAndMessage.message.length >= params.getBodyLength()) {
+        if (params.getKeyLength() + 1 + dest.length + message.length >= params.getBodyLength()) {
             throw new SphinxException("Destination and message too long");
         }
 
@@ -173,10 +176,10 @@ public class SphinxClient {
 
         packer = MessagePack.newDefaultBufferPacker();
         packer.packArrayHeader(2);
-        packer.packBinaryHeader(destinationAndMessage.destination.length);
-        packer.writePayload(destinationAndMessage.destination);
-        packer.packBinaryHeader(destinationAndMessage.message.length);
-        packer.writePayload(destinationAndMessage.message);
+        packer.packBinaryHeader(dest.length);
+        packer.writePayload(dest);
+        packer.packBinaryHeader(message.length);
+        packer.writePayload(message);
         packer.close();
 
         byte[] encodedDestAndMsg = packer.toByteArray();
