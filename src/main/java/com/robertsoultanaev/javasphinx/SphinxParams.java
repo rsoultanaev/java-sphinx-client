@@ -12,7 +12,8 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
 import java.math.BigInteger;
 import org.bouncycastle.math.ec.ECPoint;
 
-import java.util.Arrays;
+import static com.robertsoultanaev.javasphinx.Util.slice;
+import static com.robertsoultanaev.javasphinx.Util.concatenate;
 
 public class SphinxParams {
 
@@ -72,32 +73,32 @@ public class SphinxParams {
         }
 
         // Round 1
-        byte[] messageShort = Arrays.copyOf(message, keyLength);
-        byte[] messageLong = Arrays.copyOfRange(message, keyLength, message.length);
+        byte[] messageShort = slice(message, keyLength);
+        byte[] messageLong = slice(message, keyLength, message.length);
         byte[] one = "1".getBytes();
-        byte[] k1 = Arrays.copyOf(hash(Util.concatByteArrays(messageLong, key, one)), keyLength);
+        byte[] k1 = slice(hash(concatenate(messageLong, key, one)), keyLength);
         byte[] c = aesCtr(key, messageShort, k1);
-        byte[] r1 = Util.concatByteArrays(c, messageLong);
+        byte[] r1 = concatenate(c, messageLong);
 
         // Round 2
-        byte[] r1Short = Arrays.copyOf(r1, keyLength);
-        byte[] r1Long = Arrays.copyOfRange(r1, keyLength, message.length);
+        byte[] r1Short = slice(r1, keyLength);
+        byte[] r1Long = slice(r1, keyLength, message.length);
         c = aesCtr(key, r1Long, r1Short);
-        byte[] r2 = Util.concatByteArrays(r1Short, c);
+        byte[] r2 = concatenate(r1Short, c);
 
         // Round 3
-        byte[] r2Short = Arrays.copyOf(r2, keyLength);
-        byte[] r2Long = Arrays.copyOfRange(r2, keyLength, message.length);
+        byte[] r2Short = slice(r2, keyLength);
+        byte[] r2Long = slice(r2, keyLength, message.length);
         byte[] three = "3".getBytes();
-        byte[] k3 = Arrays.copyOf(hash(Util.concatByteArrays(r2Long, key, three)), keyLength);
+        byte[] k3 = slice(hash(concatenate(r2Long, key, three)), keyLength);
         c = aesCtr(key, r2Short, k3);
-        byte[] r3 = Util.concatByteArrays(c, r2Long);
+        byte[] r3 = concatenate(c, r2Long);
 
         // Round 4
-        byte[] r3Short = Arrays.copyOf(r3, keyLength);
-        byte[] r3Long = Arrays.copyOfRange(r3, keyLength, message.length);
+        byte[] r3Short = slice(r3, keyLength);
+        byte[] r3Long = slice(r3, keyLength, message.length);
         c = aesCtr(key, r3Long, r3Short);
-        byte[] r4 = Util.concatByteArrays(r3Short, c);
+        byte[] r4 = concatenate(r3Short, c);
 
         return r4;
     }
@@ -111,8 +112,8 @@ public class SphinxParams {
             throw new SphinxException("Length of provided message (" + message.length + ") needs to be at least double the length of the key (" + keyLength + ")");
         }
 
-        byte[] r4Short = Arrays.copyOf(message, keyLength);
-        byte[] r4Long = Arrays.copyOfRange(message, keyLength, message.length);
+        byte[] r4Short = slice(message, keyLength);
+        byte[] r4Long = slice(message, keyLength, message.length);
 
         // Round 4
         byte[] r3Long = aesCtr(key, r4Long, r4Short);
@@ -120,7 +121,7 @@ public class SphinxParams {
 
         // Round 3
         byte[] three = "3".getBytes();
-        byte[] k2 = Arrays.copyOf(hash(Util.concatByteArrays(r3Long, key, three)), keyLength);
+        byte[] k2 = slice(hash(concatenate(r3Long, key, three)), keyLength);
         byte[] r2Short = aesCtr(key, r3Short, k2);
         byte[] r2Long = r3Long;
 
@@ -130,9 +131,9 @@ public class SphinxParams {
 
         // Round 1
         byte[] one = "1".getBytes();
-        byte[] k0 = Arrays.copyOf(hash(Util.concatByteArrays(r1Long, key, one)), keyLength);
+        byte[] k0 = slice(hash(concatenate(r1Long, key, one)), keyLength);
         byte[] c = aesCtr(key, r1Short, k0);
-        byte[] r0 = Util.concatByteArrays(c, r1Long);
+        byte[] r0 = concatenate(c, r1Long);
 
         return r0;
     }
@@ -154,7 +155,7 @@ public class SphinxParams {
         mac.update(data, 0, data.length);
         mac.doFinal(output, 0);
 
-        return Arrays.copyOf(output, keyLength);
+        return slice(output, keyLength);
     }
 
     public byte[] pi(byte[] key, byte[] data) {
@@ -195,10 +196,10 @@ public class SphinxParams {
         byte[] prefix = "aes_key:".getBytes();
         byte[] printable = group.printable(s);
 
-        byte[] data = Util.concatByteArrays(prefix, printable);
+        byte[] data = concatenate(prefix, printable);
         byte[] hash = hash(data);
 
-        return Arrays.copyOf(hash, keyLength);
+        return slice(hash, keyLength);
     }
 
     public byte[] deriveKey(byte[] k, byte[] flavor) {

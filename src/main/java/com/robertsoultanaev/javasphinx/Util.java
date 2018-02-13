@@ -5,7 +5,7 @@ import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
 
 public class Util {
-    public static byte[] concatByteArrays(byte[]... arrays) {
+    public static byte[] concatenate(byte[]... arrays) {
         int length = 0;
         for (byte[] array : arrays) {
             length += array.length;
@@ -25,5 +25,16 @@ public class Util {
     public static ECPoint decodeECPoint(byte[] encodedECPoint) {
         ECCurve ecCurve = ECNamedCurveTable.getParameterSpec(ECCGroup.DEFAULT_CURVE_NAME).getCurve();
         return ecCurve.decodePoint(encodedECPoint);
+    }
+
+    public static byte[] slice(byte[] source, int start, int end) {
+        int resultLength = end - start;
+        byte[] result = new byte[resultLength];
+        System.arraycopy(source, start, result, 0, resultLength);
+        return result;
+    }
+
+    public static byte[] slice(byte[] source, int end) {
+        return slice(source, 0, end);
     }
 }
