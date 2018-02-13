@@ -25,12 +25,17 @@ public class SphinxClient {
 
     public static final int MAX_DEST_SIZE = 127;
 
-    public static byte[] encodeNode(int idnum) throws IOException {
+    public static byte[] encodeNode(int idnum) {
         MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
-        packer.packArrayHeader(2);
-        packer.packString(RELAY_FLAG);
-        packer.packInt(idnum);
-        packer.close();
+
+        try {
+            packer.packArrayHeader(2);
+            packer.packString(RELAY_FLAG);
+            packer.packInt(idnum);
+            packer.close();
+        } catch (IOException ex) {
+            throw new SphinxException("Failed to encode node");
+        }
 
         return packer.toByteArray();
     }
@@ -157,7 +162,7 @@ public class SphinxClient {
         return new HeaderAndSecrets(header, secrets);
     }
 
-    public static HeaderAndDelta createForwardMessage(SphinxParams params, byte[][] nodelist, ECPoint[] keys, DestinationAndMessage destinationAndMessage) throws IOException {
+    public static HeaderAndDelta createForwardMessage(SphinxParams params, byte[][] nodelist, ECPoint[] keys, DestinationAndMessage destinationAndMessage) {
         byte[] dest = destinationAndMessage.destination;
         byte[] message = destinationAndMessage.message;
 
@@ -168,20 +173,28 @@ public class SphinxClient {
         MessageBufferPacker packer;
 
         packer = MessagePack.newDefaultBufferPacker();
-        packer.packArrayHeader(1);
-        packer.packString(DEST_FLAG);
-        packer.close();
+        try {
+            packer.packArrayHeader(1);
+            packer.packString(DEST_FLAG);
+            packer.close();
+        } catch (IOException ex) {
+            throw new SphinxException("Failed to pack the destination flag");
+        }
 
         byte[] finalDestination = packer.toByteArray();
         HeaderAndSecrets headerAndSecrets = createHeader(params, nodelist, keys, finalDestination);
 
         packer = MessagePack.newDefaultBufferPacker();
-        packer.packArrayHeader(2);
-        packer.packBinaryHeader(dest.length);
-        packer.writePayload(dest);
-        packer.packBinaryHeader(message.length);
-        packer.writePayload(message);
-        packer.close();
+        try {
+            packer.packArrayHeader(2);
+            packer.packBinaryHeader(dest.length);
+            packer.writePayload(dest);
+            packer.packBinaryHeader(message.length);
+            packer.writePayload(message);
+            packer.close();
+        } catch (IOException ex) {
+            throw new SphinxException("Failed to pack destination and message");
+        }
 
         byte[] encodedDestAndMsg = packer.toByteArray();
 
@@ -201,7 +214,7 @@ public class SphinxClient {
         return new HeaderAndDelta(headerAndSecrets.header, delta);
     }
 
-    public static Surb createSurb(SphinxParams params, byte[][] nodelist, ECPoint[] keys, byte[] dest) throws IOException {
+    public static Surb createSurb(SphinxParams params, byte[][] nodelist, ECPoint[] keys, byte[] dest) {
         SecureRandom secureRandom = new SecureRandom();
         int nu = nodelist.length;
 
@@ -209,13 +222,17 @@ public class SphinxClient {
         secureRandom.nextBytes(xid);
 
         MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
-        packer.packArrayHeader(3);
-        packer.packString(SURB_FLAG);
-        packer.packBinaryHeader(dest.length);
-        packer.writePayload(dest);
-        packer.packBinaryHeader(xid.length);
-        packer.writePayload(xid);
-        packer.close();
+        try {
+            packer.packArrayHeader(3);
+            packer.packString(SURB_FLAG);
+            packer.packBinaryHeader(dest.length);
+            packer.writePayload(dest);
+            packer.packBinaryHeader(xid.length);
+            packer.writePayload(xid);
+            packer.close();
+        } catch (IOException ex) {
+            throw new SphinxException("Failed to pack SURB");
+        }
 
         byte[] finalDest = packer.toByteArray();
         HeaderAndSecrets headerAndSecrets = createHeader(params, nodelist, keys, finalDest);
@@ -250,7 +267,7 @@ public class SphinxClient {
         return new HeaderAndDelta(nymTuple.header, delta);
     }
 
-    public static DestinationAndMessage receiveForward(SphinxParams params, byte[] delta) throws IOException {
+    public static DestinationAndMessage receiveForward(SphinxParams params, byte[] delta) {
         byte[] zeroes = new byte[params.getKeyLength()];
         Arrays.fill(zeroes, (byte) 0x00);
 
@@ -262,12 +279,17 @@ public class SphinxClient {
 
         byte[] encodedDestAndMsg = unpadBody(slice(delta, params.getKeyLength(), delta.length));
         MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(encodedDestAndMsg);
-        unpacker.unpackArrayHeader();
-        int destLength = unpacker.unpackBinaryHeader();
-        byte[] destination = unpacker.readPayload(destLength);
-        int msgLength = unpacker.unpackBinaryHeader();
-        byte[] message = unpacker.readPayload(msgLength);
-        unpacker.close();
+        byte[] destination, message;
+        try {
+            unpacker.unpackArrayHeader();
+            int destLength = unpacker.unpackBinaryHeader();
+            destination = unpacker.readPayload(destLength);
+            int msgLength = unpacker.unpackBinaryHeader();
+            message = unpacker.readPayload(msgLength);
+            unpacker.close();
+        } catch (IOException ex) {
+            throw new SphinxException("Failed to unpack the destination and message");
+        }
 
         return new DestinationAndMessage(destination, message);
     }
@@ -291,7 +313,7 @@ public class SphinxClient {
         return unpadBody(slice(delta, params.getKeyLength(), delta.length));
     }
 
-    public static byte[] packMessage(SphinxPacket sphinxPacket) throws IOException {
+    public static byte[] packMessage(SphinxPacket sphinxPacket) {
         MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
 
         int headerLength = sphinxPacket.paramLengths.headerLength;
@@ -301,50 +323,64 @@ public class SphinxClient {
         byte[] delta = sphinxPacket.headerAndDelta.delta;
         byte[] packedEcPoint = packECPoint(header.alpha);
 
-        packer
-                .packArrayHeader(2)
-                .packArrayHeader(2)
-                .packInt(headerLength)
-                .packInt(bodyLength)
-                .packArrayHeader(2)
-                .packArrayHeader(3)
-                .packExtensionTypeHeader((byte) 2, packedEcPoint.length)
-                .writePayload(packedEcPoint)
-                .packBinaryHeader(header.beta.length)
-                .writePayload(header.beta)
-                .packBinaryHeader(header.gamma.length)
-                .writePayload(header.gamma)
-                .packBinaryHeader(delta.length)
-                .writePayload(delta);
-        packer.close();
+        try {
+            packer.packArrayHeader(2);
+            packer.packArrayHeader(2);
+            packer.packInt(headerLength);
+            packer.packInt(bodyLength);
+            packer.packArrayHeader(2);
+            packer.packArrayHeader(3);
+            packer.packExtensionTypeHeader((byte) 2, packedEcPoint.length);
+            packer.writePayload(packedEcPoint);
+            packer.packBinaryHeader(header.beta.length);
+            packer.writePayload(header.beta);
+            packer.packBinaryHeader(header.gamma.length);
+            packer.writePayload(header.gamma);
+            packer.packBinaryHeader(delta.length);
+            packer.writePayload(delta);
+            packer.close();
+        } catch (IOException ex) {
+            throw new SphinxException("Failed to pack the sphinx packet");
+        }
 
         return packer.toByteArray();
     }
 
-    public static SphinxPacket unpackMessage(byte[] m) throws IOException {
+    public static SphinxPacket unpackMessage(byte[] m) {
         MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(m);
-        unpacker.unpackArrayHeader();
-        unpacker.unpackArrayHeader();
-        int headerLength = unpacker.unpackInt();
-        int bodyLength = unpacker.unpackInt();
-        unpacker.unpackArrayHeader();
-        unpacker.unpackArrayHeader();
-        int alphaLength = unpacker.unpackExtensionTypeHeader().getLength();
-        byte[] packedAlpha = unpacker.readPayload(alphaLength);
-        int betaLength = unpacker.unpackBinaryHeader();
-        byte[] beta = unpacker.readPayload(betaLength);
-        int gammaLength = unpacker.unpackBinaryHeader();
-        byte[] gamma = unpacker.readPayload(gammaLength);
-        int deltaLength = unpacker.unpackBinaryHeader();
-        byte[] delta = unpacker.readPayload(deltaLength);
-        unpacker.close();
+        int headerLength, bodyLength;
+        byte[] packedAlpha, beta, gamma, delta;
+        try {
+            unpacker.unpackArrayHeader();
+            unpacker.unpackArrayHeader();
+            headerLength = unpacker.unpackInt();
+            bodyLength = unpacker.unpackInt();
+            unpacker.unpackArrayHeader();
+            unpacker.unpackArrayHeader();
+            int alphaLength = unpacker.unpackExtensionTypeHeader().getLength();
+            packedAlpha = unpacker.readPayload(alphaLength);
+            int betaLength = unpacker.unpackBinaryHeader();
+            beta = unpacker.readPayload(betaLength);
+            int gammaLength = unpacker.unpackBinaryHeader();
+            gamma = unpacker.readPayload(gammaLength);
+            int deltaLength = unpacker.unpackBinaryHeader();
+            delta = unpacker.readPayload(deltaLength);
+            unpacker.close();
+        } catch (IOException ex) {
+            throw new SphinxException("Failed to unpack the sphinx packet");
+        }
 
         unpacker = MessagePack.newDefaultUnpacker(packedAlpha);
-        unpacker.unpackArrayHeader();
-        unpacker.unpackInt();
-        int encodedAlphaLength = unpacker.unpackBinaryHeader();
-        byte[] encodedAlpha = unpacker.readPayload(encodedAlphaLength);
-        unpacker.close();
+        byte[] encodedAlpha;
+        try {
+            unpacker.unpackArrayHeader();
+            unpacker.unpackInt();
+            int encodedAlphaLength = unpacker.unpackBinaryHeader();
+            encodedAlpha = unpacker.readPayload(encodedAlphaLength);
+            unpacker.close();
+        } catch (IOException ex) {
+            throw new SphinxException("Failed to unpack alpha");
+        }
 
         ECPoint alpha = Util.decodeECPoint(encodedAlpha);
 
@@ -407,15 +443,19 @@ public class SphinxClient {
         return ret;
     }
 
-    private static byte[] packECPoint(ECPoint ecPoint) throws IOException {
+    private static byte[] packECPoint(ECPoint ecPoint) {
         byte[] encodedEcPoint = ecPoint.getEncoded(true);
 
         MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
-        packer.packArrayHeader(2);
-        packer.packInt(ECCGroup.DEFAULT_CURVE_NID);
-        packer.packBinaryHeader(encodedEcPoint.length);
-        packer.writePayload(encodedEcPoint);
-        packer.close();
+        try {
+            packer.packArrayHeader(2);
+            packer.packInt(ECCGroup.DEFAULT_CURVE_NID);
+            packer.packBinaryHeader(encodedEcPoint.length);
+            packer.writePayload(encodedEcPoint);
+            packer.close();
+        } catch (IOException ex) {
+            throw new SphinxException("Failed to pack the sphinx packet");
+        }
 
         return packer.toByteArray();
     }
