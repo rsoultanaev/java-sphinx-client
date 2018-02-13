@@ -66,7 +66,7 @@ public class SphinxClient {
         for (int i = 0; i < nodelist.length; i++) {
             byte[] node = nodelist[i];
             byte[] nodeLength = {(byte) node.length};
-            nodeMeta[i] = Util.concatByteArrays(nodeLength, node);
+            nodeMeta[i] = Util.concatenate(nodeLength, node);
         }
 
         int nu = nodelist.length;
@@ -95,11 +95,11 @@ public class SphinxClient {
         for (int i = 1; i < nu; i++) {
             byte[] zeroes1 = new byte[params.getKeyLength() + nodeMeta[i].length];
             Arrays.fill(zeroes1, (byte) 0x00);
-            byte[] plain = Util.concatByteArrays(phi, zeroes1);
+            byte[] plain = Util.concatenate(phi, zeroes1);
 
             byte[] zeroes2 = new byte[minLen];
             Arrays.fill(zeroes2, (byte) 0x00);
-            byte[] zeroes2plain = Util.concatByteArrays(zeroes2, plain);
+            byte[] zeroes2plain = Util.concatenate(zeroes2, plain);
             phi = params.xorRho(params.hrho(asbtuples.get(i-1).aes), zeroes2plain);
             phi = Arrays.copyOfRange(phi, minLen, phi.length);
 
@@ -116,7 +116,7 @@ public class SphinxClient {
         }
 
         byte[] destLength = {(byte) dest.length};
-        byte[] finalRouting = Util.concatByteArrays(destLength, dest);
+        byte[] finalRouting = Util.concatenate(destLength, dest);
 
         int randomPadLen = (params.getHeaderLength() - 32) - lenMeta - (nu-1)*params.getKeyLength() - finalRouting.length;
         if (randomPadLen < 0) {
@@ -127,9 +127,9 @@ public class SphinxClient {
         byte[] randomPad = new byte[randomPadLen];
         secureRandom.nextBytes(randomPad);
 
-        byte[] beta = Util.concatByteArrays(finalRouting, randomPad);
+        byte[] beta = Util.concatenate(finalRouting, randomPad);
         beta = params.xorRho(params.hrho(asbtuples.get(nu - 1).aes), beta);
-        beta = Util.concatByteArrays(beta, phi);
+        beta = Util.concatenate(beta, phi);
 
         byte[] gamma = params.mu(params.hmu(asbtuples.get(nu-1).aes), beta);
 
@@ -138,7 +138,7 @@ public class SphinxClient {
 
             int plainBetaLen = (params.getHeaderLength() - 32) - params.getKeyLength() - nodeId.length;
             byte[] plainBeta = Arrays.copyOf(beta, plainBetaLen);
-            byte[] plain = Util.concatByteArrays(nodeId, gamma, plainBeta);
+            byte[] plain = Util.concatenate(nodeId, gamma, plainBeta);
 
             beta = params.xorRho(params.hrho(asbtuples.get(i).aes), plain);
             gamma = params.mu(params.hmu(asbtuples.get(i).aes), beta);
@@ -185,7 +185,7 @@ public class SphinxClient {
         byte[] zeroes = new byte[params.getKeyLength()];
         Arrays.fill(zeroes, (byte) 0x00);
 
-        byte[] body = Util.concatByteArrays(zeroes, encodedDestAndMsg);
+        byte[] body = Util.concatenate(zeroes, encodedDestAndMsg);
         body = padBody(params.getBodyLength(), body);
 
         byte[][] secrets = headerAndSecrets.secrets;
@@ -240,7 +240,7 @@ public class SphinxClient {
     public static HeaderAndDelta packageSurb(SphinxParams params, NymTuple nymTuple, byte[] message) {
         byte[] zeroes = new byte[params.getKeyLength()];
         Arrays.fill(zeroes, (byte) 0x00);
-        byte[] zeroPaddedMessage = Util.concatByteArrays(zeroes, message);
+        byte[] zeroPaddedMessage = Util.concatenate(zeroes, message);
         byte[] body = padBody(params.getBodyLength(), zeroPaddedMessage);
         byte[] delta = params.pi(nymTuple.ktilde, body);
 
@@ -383,7 +383,7 @@ public class SphinxClient {
         byte[] padBytes = new byte[numPadBytes];
         Arrays.fill(padBytes, (byte) 0xff);
 
-        return Util.concatByteArrays(body, initialPadByte, padBytes);
+        return Util.concatenate(body, initialPadByte, padBytes);
     }
 
     private static byte[] unpadBody(byte[] body) {

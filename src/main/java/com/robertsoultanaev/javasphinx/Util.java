@@ -5,7 +5,7 @@ import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
 
 public class Util {
-    public static byte[] concatByteArrays(byte[]... arrays) {
+    public static byte[] concatenate(byte[]... arrays) {
         int length = 0;
         for (byte[] array : arrays) {
             length += array.length;

@@ -28,7 +28,7 @@ public class SphinxNode {
 
         byte[] betaPadZeroes = new byte[2 * params.getBodyLength()];
         Arrays.fill(betaPadZeroes, (byte) 0x00);
-        byte[] betaPad = Util.concatByteArrays(beta, betaPadZeroes);
+        byte[] betaPad = Util.concatenate(beta, betaPadZeroes);
 
         byte[] B = params.xorRho(params.hrho(aesS), betaPad);
 
