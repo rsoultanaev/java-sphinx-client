@@ -16,8 +16,6 @@ public class SphinxNode {
         byte[] gamma = headerAndDelta.header.gamma;
         byte[] delta = headerAndDelta.delta;
 
-        // TODO: check that alpha is in the group used by params
-
         ECPoint s = group.expon(alpha, secret);
         byte[] aesS = params.getAesKey(s);
 
