@@ -1,0 +1,2 @@
+ignore:
+  - "*/ConformanceClient.java" # Ignore conformance client in coverage as it is not stricly an element of the library
