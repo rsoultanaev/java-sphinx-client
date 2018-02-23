@@ -44,11 +44,13 @@ public class SphinxNode {
         beta = slice(rest, params.getKeyLength(), params.getKeyLength() + (params.getHeaderLength() - 32));
         delta = params.pii(params.hpi(aesS), delta);
 
+        byte[] macKey = params.hpi(aesS);
+
         Header header = new Header(alpha, beta, gamma);
 
         HeaderAndDelta headerAndDelta1 = new HeaderAndDelta(header, delta);
 
-        ProcessedPacket ret = new ProcessedPacket(tag, routing, headerAndDelta1);
+        ProcessedPacket ret = new ProcessedPacket(tag, routing, headerAndDelta1, macKey);
 
         return ret;
     }
