@@ -159,9 +159,7 @@ public class SphinxClient_Test {
                 byte[] zeroes = new byte[params.getKeyLength()];
                 java.util.Arrays.fill(zeroes, (byte) 0x00);
 
-                assertArrayEquals(zeroes, Arrays.copyOf(ret.headerAndDelta.delta, 16));
-
-                DestinationAndMessage destAndMsg = SphinxClient.receiveForward(params, ret.headerAndDelta.delta);
+                DestinationAndMessage destAndMsg = SphinxClient.receiveForward(params, ret.macKey, ret.headerAndDelta.delta);
 
                 assertArrayEquals(dest, destAndMsg.destination);
                 assertArrayEquals(message, destAndMsg.message);
@@ -210,9 +208,9 @@ public class SphinxClient_Test {
                 byte[] zeroes = new byte[params.getKeyLength()];
                 java.util.Arrays.fill(zeroes, (byte) 0x00);
 
-                assertArrayEquals(zeroes, Arrays.copyOf(ret.headerAndDelta.delta, 16));
+//                assertArrayEquals(zeroes, Arrays.copyOf(ret.headerAndDelta.delta, 16));
 
-                DestinationAndMessage destAndMsg = SphinxClient.receiveForward(params, ret.headerAndDelta.delta);
+                DestinationAndMessage destAndMsg = SphinxClient.receiveForward(params, ret.macKey, ret.headerAndDelta.delta);
 
                 assertArrayEquals(dest, destAndMsg.destination);
                 assertArrayEquals(message, destAndMsg.message);
@@ -268,15 +266,54 @@ public class SphinxClient_Test {
     }
 
     @Test(expected = SphinxException.class)
-    public void receiveForwardBadDelta() throws Exception {
+    public void receiveForwardCorruptedPayload() throws Exception {
         byte[] dest = "bob".getBytes();
         byte[] message = "this is a test".getBytes();
 
         DestinationAndMessage destinationAndMessage = new DestinationAndMessage(dest, message);
 
         HeaderAndDelta headerAndDelta = SphinxClient.createForwardMessage(params, nodesRouting, nodeKeys, destinationAndMessage);
-        headerAndDelta.delta[0] = 1;
-        SphinxClient.receiveForward(params, headerAndDelta.delta);
+
+        BigInteger x = pkiPriv.get(useNodes[0]).x;
+
+        MessageUnpacker unpacker;
+
+        while (true) {
+            ProcessedPacket ret = SphinxNode.sphinxProcess(params, x, headerAndDelta);
+            headerAndDelta = ret.headerAndDelta;
+
+            byte[] encodedRouting = ret.routing;
+
+            unpacker = MessagePack.newDefaultUnpacker(encodedRouting);
+            int routingLen = unpacker.unpackArrayHeader();
+            String flag = unpacker.unpackString();
+
+            assertTrue(flag.equals(SphinxClient.RELAY_FLAG) || flag.equals(SphinxClient.DEST_FLAG));
+
+            if (flag.equals(SphinxClient.RELAY_FLAG)) {
+                int addr = unpacker.unpackInt();
+                x = pkiPriv.get(addr).x;
+
+                unpacker.close();
+            } else if (flag.equals(SphinxClient.DEST_FLAG)) {
+                unpacker.close();
+
+                assertEquals(1, routingLen);
+
+                byte[] zeroes = new byte[params.getKeyLength()];
+                java.util.Arrays.fill(zeroes, (byte) 0x00);
+
+                // Corrupt payload
+                ret.headerAndDelta.delta[20]++;
+
+                DestinationAndMessage destAndMsg = SphinxClient.receiveForward(params, ret.macKey, ret.headerAndDelta.delta);
+
+                assertArrayEquals(dest, destAndMsg.destination);
+                assertArrayEquals(message, destAndMsg.message);
+
+                break;
+            }
+        }
     }
 
     @Test(expected = SphinxException.class)

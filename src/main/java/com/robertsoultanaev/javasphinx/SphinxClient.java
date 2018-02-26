@@ -198,13 +198,11 @@ public class SphinxClient {
 
         byte[] encodedDestAndMsg = packer.toByteArray();
 
-        byte[] zeroes = new byte[params.getKeyLength()];
-        Arrays.fill(zeroes, (byte) 0x00);
-
-        byte[] body = concatenate(zeroes, encodedDestAndMsg);
-        body = padBody(params.getBodyLength(), body);
-
         byte[][] secrets = headerAndSecrets.secrets;
+        byte[] payload = padBody(params.getBodyLength() - params.getKeyLength(), encodedDestAndMsg);
+        byte[] mac = params.mu(params.hpi(secrets[nodelist.length - 1]), payload);
+        byte[] body = concatenate(mac, payload);
+
         byte[] delta = params.pi(params.hpi(secrets[nodelist.length - 1]), body);
 
         for (int i = nodelist.length - 2; i >= 0; i--) {
@@ -267,14 +265,16 @@ public class SphinxClient {
         return new HeaderAndDelta(nymTuple.header, delta);
     }
 
-    public static DestinationAndMessage receiveForward(SphinxParams params, byte[] delta) {
-        byte[] zeroes = new byte[params.getKeyLength()];
-        Arrays.fill(zeroes, (byte) 0x00);
+    public static DestinationAndMessage receiveForward(SphinxParams params, byte[] macKey, byte[] delta) {
+        byte[] body = slice(delta, params.getKeyLength(), delta.length);
+        byte[] mac = slice(delta, params.getKeyLength());
 
-        if (!Arrays.equals(slice(delta, params.getKeyLength()), zeroes)) {
-            String deltaPrefix = Hex.toHexString(slice(delta, params.getKeyLength()));
-            String expectedPrefix = Hex.toHexString(zeroes);
-            throw new SphinxException("Prefix of delta (" + deltaPrefix + ") did not match the expected prefix (" + expectedPrefix + ")");
+        byte[] expectedMac = params.mu(macKey, body);
+
+        if (!Arrays.equals(mac, expectedMac)) {
+            String messageMacStr = Hex.toHexString(mac);
+            String expectedMacStr = Hex.toHexString(expectedMac);
+            throw new SphinxException("Provided MAC (" + messageMacStr + ") did not match the expected MAC (" + expectedMacStr + ")");
         }
 
         byte[] encodedDestAndMsg = unpadBody(slice(delta, params.getKeyLength(), delta.length));
