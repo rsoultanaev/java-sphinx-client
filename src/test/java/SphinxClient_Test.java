@@ -130,43 +130,9 @@ public class SphinxClient_Test {
 
         HeaderAndDelta headerAndDelta = SphinxClient.createForwardMessage(params, nodesRouting, nodeKeys, destinationAndMessage);
 
-        BigInteger x = pkiPriv.get(useNodes[0]).x;
+        BigInteger firstNodeKey = pkiPriv.get(useNodes[0]).x;
 
-        MessageUnpacker unpacker;
-
-        while (true) {
-            ProcessedPacket ret = SphinxNode.sphinxProcess(params, x, headerAndDelta);
-            headerAndDelta = ret.headerAndDelta;
-
-            byte[] encodedRouting = ret.routing;
-
-            unpacker = MessagePack.newDefaultUnpacker(encodedRouting);
-            int routingLen = unpacker.unpackArrayHeader();
-            String flag = unpacker.unpackString();
-
-            assertTrue(flag.equals(SphinxClient.RELAY_FLAG) || flag.equals(SphinxClient.DEST_FLAG));
-
-            if (flag.equals(SphinxClient.RELAY_FLAG)) {
-                int addr = unpacker.unpackInt();
-                x = pkiPriv.get(addr).x;
-
-                unpacker.close();
-            } else if (flag.equals(SphinxClient.DEST_FLAG)) {
-                unpacker.close();
-
-                assertEquals(1, routingLen);
-
-                byte[] zeroes = new byte[params.getKeyLength()];
-                java.util.Arrays.fill(zeroes, (byte) 0x00);
-
-                DestinationAndMessage destAndMsg = SphinxClient.receiveForward(params, ret.macKey, ret.headerAndDelta.delta);
-
-                assertArrayEquals(dest, destAndMsg.destination);
-                assertArrayEquals(message, destAndMsg.message);
-
-                break;
-            }
-        }
+        testRouting(params, headerAndDelta, firstNodeKey, dest, message);
     }
 
     @Test
@@ -179,12 +145,34 @@ public class SphinxClient_Test {
 
         HeaderAndDelta headerAndDelta = SphinxClient.createForwardMessage(params, nodesRouting, nodeKeys, destinationAndMessage);
 
-        BigInteger x = pkiPriv.get(useNodes[0]).x;
+        BigInteger firstNodeKey = pkiPriv.get(useNodes[0]).x;
 
+        testRouting(params, headerAndDelta, firstNodeKey, dest, message);
+    }
+
+    @Test
+    public void routeSphinxMessageNonDefaultBodySize() throws Exception {
+        SphinxParams params = new SphinxParams(16, 4096, 192, new ECCGroup());
+
+        byte[] dest = "bob".getBytes();
+        byte[] message = new byte[SphinxClient.getMaxPayloadSize(params) - dest.length];
+        Arrays.fill(message, (byte) 0xaa);
+
+        DestinationAndMessage destinationAndMessage = new DestinationAndMessage(dest, message);
+
+        HeaderAndDelta headerAndDelta = SphinxClient.createForwardMessage(params, nodesRouting, nodeKeys, destinationAndMessage);
+
+        BigInteger firstNodeKey = pkiPriv.get(useNodes[0]).x;
+
+        testRouting(params, headerAndDelta, firstNodeKey, dest, message);
+    }
+
+    private void testRouting(SphinxParams params, HeaderAndDelta headerAndDelta, BigInteger firstNodeKey, byte[] dest, byte[] message) throws Exception {
+        BigInteger currentNodeKey = firstNodeKey;
         MessageUnpacker unpacker;
 
         while (true) {
-            ProcessedPacket ret = SphinxNode.sphinxProcess(params, x, headerAndDelta);
+            ProcessedPacket ret = SphinxNode.sphinxProcess(params, currentNodeKey, headerAndDelta);
             headerAndDelta = ret.headerAndDelta;
 
             byte[] encodedRouting = ret.routing;
@@ -197,18 +185,13 @@ public class SphinxClient_Test {
 
             if (flag.equals(SphinxClient.RELAY_FLAG)) {
                 int addr = unpacker.unpackInt();
-                x = pkiPriv.get(addr).x;
+                currentNodeKey = pkiPriv.get(addr).x;
 
                 unpacker.close();
             } else if (flag.equals(SphinxClient.DEST_FLAG)) {
                 unpacker.close();
 
                 assertEquals(1, routingLen);
-
-                byte[] zeroes = new byte[params.getKeyLength()];
-                java.util.Arrays.fill(zeroes, (byte) 0x00);
-
-//                assertArrayEquals(zeroes, Arrays.copyOf(ret.headerAndDelta.delta, 16));
 
                 DestinationAndMessage destAndMsg = SphinxClient.receiveForward(params, ret.macKey, ret.headerAndDelta.delta);
 
