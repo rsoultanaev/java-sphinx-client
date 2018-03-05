@@ -22,11 +22,15 @@ public class SphinxParams {
     private final int headerLength;
     private final ECCGroup group;
 
+    public SphinxParams(int keyLength, int bodyLength, int headerLength, ECCGroup group) {
+        this.keyLength = keyLength;
+        this.bodyLength = bodyLength;
+        this.headerLength = headerLength;
+        this.group = group;
+    }
+
     public SphinxParams() {
-        this.keyLength = 16;
-        this.bodyLength = 1024;
-        this.headerLength = 192;
-        this.group = new ECCGroup();
+        this(16, 1024, 192, new ECCGroup());
     }
 
     public int getKeyLength() {
