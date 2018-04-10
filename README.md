@@ -7,7 +7,7 @@ Java implementation of the sphinx packet format.
 
 This is a port of the [Python implementation of the sphinx software.](https://github.com/UCL-InfoSec/sphinx)
 
-# Documentation
+# Usage
 
 ## Encoding forward messages
 
