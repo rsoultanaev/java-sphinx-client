@@ -7,7 +7,7 @@ Java implementation of the sphinx packet format.
 
 This is a port of the [Python implementation of the sphinx software.](https://github.com/UCL-InfoSec/sphinx)
 
-# Building the library
+## Building the library
 
 This library is built using maven. To build it, run:
 
@@ -17,9 +17,19 @@ mvn package
 
 The jar of the library will be placed in `target/javasphinx-1.0-SNAPSHOT.jar`.
 
-# Usage
+## Javadocs
 
-## Encoding forward messages
+To compile the javadocs for the library, run:
+
+```
+mvn javadoc:javadoc
+```
+
+The javadocs will be placed in `target/site/apidocs/`.
+
+## Usage
+
+### Encoding forward messages
 
 The following import statements are required for the snippets in this section:
 
@@ -99,7 +109,7 @@ SphinxPacket sphinxPacket = new SphinxPacket(paramLengths, headerAndDelta);
 byte[] binMessage = SphinxClient.packMessage(sphinxPacket);
 ```
 
-## Processing Sphinx messages at a mix
+### Processing Sphinx messages at a mix
 
 In addition to the import statements in the previous section, unpacking and processing messages requires the use of MessagePack:
 
@@ -149,7 +159,7 @@ if (flag.equals(SphinxClient.RELAY_FLAG)) {
 }
 ```
 
-## Single-use reply Blocks
+### Single-use reply Blocks
 
 Sphinx supports the ability to reply to anonymous senders, if they include a single-use reply block (SURB) in their forward message. To create a SURB the sender uses the `SphinxClient.createSurb()` method:
 
@@ -186,6 +196,6 @@ Finally at the recipient of the reply, `finalSurbId` is used to find the corresp
 byte[] received = SphinxClient.receiveSurb(params, surb.keytuple, headerAndDelta.delta);
 ```
 
-# Conformance testing
+## Conformance testing
 
 The library includes a conformance client for the conformance test for the Python version of the library. After running `mvn package`, the executable jar file to be used as the conformance client will be placed in `target/javasphinx-conformance-client.jar`.
