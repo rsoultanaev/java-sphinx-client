@@ -3,6 +3,9 @@ package com.robertsoultanaev.javasphinx;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.encoders.Base64;
 
+/**
+ * Client used for conformance testing
+ */
 public class ConformanceClient {
     public static void main(String args[]) throws Exception {
         byte[] dest = Base64.decode(args[0]);

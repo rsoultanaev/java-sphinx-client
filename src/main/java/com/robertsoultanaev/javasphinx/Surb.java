@@ -1,5 +1,8 @@
 package com.robertsoultanaev.javasphinx;
 
+/**
+ * Type to combine a reply block and the related information
+ */
 public class Surb {
     public final byte[] xid;
     public final byte[][] keytuple;

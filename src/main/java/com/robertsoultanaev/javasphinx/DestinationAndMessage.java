@@ -1,5 +1,8 @@
 package com.robertsoultanaev.javasphinx;
 
+/**
+ * Type to combine destination and message
+ */
 public class DestinationAndMessage {
     public final byte[] destination;
     public final byte[] message;
