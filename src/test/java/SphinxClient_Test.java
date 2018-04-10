@@ -232,14 +232,21 @@ public class SphinxClient_Test {
 
                 unpacker.close();
             } else if (flag.equals(SphinxClient.SURB_FLAG)) {
+                int destLength = unpacker.unpackBinaryHeader();
+                byte[] finalDest = unpacker.readPayload(destLength);
+                int surbIdLength = unpacker.unpackBinaryHeader();
+                byte[] finalSurbId = unpacker.readPayload(surbIdLength);
                 unpacker.close();
+
+                assertArrayEquals(surbDest, finalDest);
+                assertArrayEquals(surb.xid, finalSurbId);
+
+                byte[] received = SphinxClient.receiveSurb(params, surb.keytuple, headerAndDelta.delta);
+                assertArrayEquals(message, received);
+
                 break;
             }
         }
-
-        byte[] received = SphinxClient.receiveSurb(params, surb.keytuple, headerAndDelta.delta);
-
-        assertArrayEquals(message, received);
     }
 
     @Test(expected = SphinxException.class)
