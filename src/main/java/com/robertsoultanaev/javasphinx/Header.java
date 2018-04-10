@@ -2,6 +2,9 @@ package com.robertsoultanaev.javasphinx;
 
 import org.bouncycastle.math.ec.ECPoint;
 
+/**
+ * Class to represent the header of a Sphinx packet
+ */
 public class Header {
     public final ECPoint alpha;
     public final byte[] beta;

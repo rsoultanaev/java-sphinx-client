@@ -8,7 +8,17 @@ import java.util.Arrays;
 import static com.robertsoultanaev.javasphinx.Util.slice;
 import static com.robertsoultanaev.javasphinx.Util.concatenate;
 
+/**
+ * Class to house the methods used by mix nodes to process Sphinx packets
+ */
 public class SphinxNode {
+    /**
+     * Method that processes Sphinx packets at a mix node
+     * @param params Sphinx parameters
+     * @param secret Mix node's private key
+     * @param headerAndDelta Header and encrypted payload of the Sphinx packet
+     * @return The new header and payload of the Sphinx packet along with some auxiliary information
+     */
     public static ProcessedPacket sphinxProcess(SphinxParams params, BigInteger secret, HeaderAndDelta headerAndDelta) {
         ECCGroup group = params.getGroup();
         ECPoint alpha = headerAndDelta.header.alpha;

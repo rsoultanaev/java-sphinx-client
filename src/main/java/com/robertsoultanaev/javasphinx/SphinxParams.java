@@ -15,6 +15,9 @@ import org.bouncycastle.math.ec.ECPoint;
 import static com.robertsoultanaev.javasphinx.Util.slice;
 import static com.robertsoultanaev.javasphinx.Util.concatenate;
 
+/**
+ * Class to represent the parameters of the Sphinx cryptographic computations, and house the internal crytographic functions used to create Sphinx packets.
+ */
 public class SphinxParams {
 
     private final int keyLength;

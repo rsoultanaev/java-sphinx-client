@@ -1,5 +1,8 @@
 package com.robertsoultanaev.javasphinx;
 
+/**
+ * Type to represent the return value of the mix node processing method
+ */
 public class ProcessedPacket {
     public final byte[] tag;
     public final byte[] routing;
