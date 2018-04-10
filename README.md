@@ -7,6 +7,16 @@ Java implementation of the sphinx packet format.
 
 This is a port of the [Python implementation of the sphinx software.](https://github.com/UCL-InfoSec/sphinx)
 
+# Building the library
+
+This library is built using maven. To build it, run:
+
+```
+mvn package
+```
+
+The jar of the library will be placed in `target/javasphinx-1.0-SNAPSHOT.jar`.
+
 # Usage
 
 ## Encoding forward messages
@@ -175,3 +185,7 @@ Finally at the recipient of the reply, `finalSurbId` is used to find the corresp
 ```java
 byte[] received = SphinxClient.receiveSurb(params, surb.keytuple, headerAndDelta.delta);
 ```
+
+# Conformance testing
+
+The library includes a conformance client for the conformance test for the Python version of the library. After running `mvn package`, the executable jar file to be used as the conformance client will be placed in `target/javasphinx-conformance-client.jar`.
