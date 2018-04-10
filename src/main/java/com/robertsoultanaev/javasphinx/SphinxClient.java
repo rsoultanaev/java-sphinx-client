@@ -92,6 +92,20 @@ public class SphinxClient {
      * @return Header and the list of secrets used to encrypt the payload in a nested manner.
      */
     public static HeaderAndSecrets createHeader(SphinxParams params, byte[][] nodelist, ECPoint[] keys, byte[] dest) {
+        class HeaderRecord {
+            final ECPoint alpha;
+            final ECPoint s;
+            final BigInteger b;
+            final byte[] aes;
+
+            HeaderRecord(ECPoint alpha, ECPoint s, BigInteger b, byte[] aes) {
+                this.alpha = alpha;
+                this.s = s;
+                this.b = b;
+                this.aes = aes;
+            }
+        }
+
         byte[][] nodeMeta = new byte[nodelist.length][];
         for (int i = 0; i < nodelist.length; i++) {
             byte[] node = nodelist[i];
